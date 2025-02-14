@@ -30,6 +30,7 @@ int main() {
 
         player.update(deltaTime, grid);
         for (auto& enemy : enemies) {
+			enemy.playerPos = player.shape.getPosition();
             enemy.update(deltaTime, grid);
         }
 
