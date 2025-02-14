@@ -1,10 +1,8 @@
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "Grid.hpp"
-#include <vector>
-#include <iostream>
-
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
