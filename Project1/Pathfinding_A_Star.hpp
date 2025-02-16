@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Grid.hpp"
-#include "Node.hpp"
 #include <vector>
 #include <iostream>
+
+#include "Grid.hpp"
+#include "Node.hpp"
 
 class Pathfinding {
 public:

@@ -75,6 +75,10 @@
     <IncludePath>C:\SFML-2.6.2\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>C:\SFML-2.6.2\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\orio6\Documents\SFML-2.6.2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\orio6\Documents\SFML-2.6.2\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -138,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BT.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Grid.cpp" />
@@ -147,6 +152,7 @@
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BT.hpp" />
     <ClInclude Include="Enemy.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Grid.hpp" />
