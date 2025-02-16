@@ -1,5 +1,7 @@
-C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\Enemy.cpp;C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\x64\Debug\Enemy.obj
-C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\Entity.cpp;C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\x64\Debug\Entity.obj
-C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\Grid.cpp;C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\x64\Debug\Grid.obj
-C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\main.cpp;C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\x64\Debug\main.obj
-C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\Player.cpp;C:\Users\dhollemaert\source\repos\dark-dylan-93220\ProjetIA\Project1\x64\Debug\Player.obj
+C:\Users\PC\source\repos\ProjetIA\Project1\Enemy.cpp;C:\Users\PC\source\repos\ProjetIA\Project1\x64\Debug\Enemy.obj
+C:\Users\PC\source\repos\ProjetIA\Project1\Entity.cpp;C:\Users\PC\source\repos\ProjetIA\Project1\x64\Debug\Entity.obj
+C:\Users\PC\source\repos\ProjetIA\Project1\Grid.cpp;C:\Users\PC\source\repos\ProjetIA\Project1\x64\Debug\Grid.obj
+C:\Users\PC\source\repos\ProjetIA\Project1\main.cpp;C:\Users\PC\source\repos\ProjetIA\Project1\x64\Debug\main.obj
+C:\Users\PC\source\repos\ProjetIA\Project1\Node.cpp;C:\Users\PC\source\repos\ProjetIA\Project1\x64\Debug\Node.obj
+C:\Users\PC\source\repos\ProjetIA\Project1\Pathfinding_A_Star.cpp;C:\Users\PC\source\repos\ProjetIA\Project1\x64\Debug\Pathfinding_A_Star.obj
+C:\Users\PC\source\repos\ProjetIA\Project1\Player.cpp;C:\Users\PC\source\repos\ProjetIA\Project1\x64\Debug\Player.obj
