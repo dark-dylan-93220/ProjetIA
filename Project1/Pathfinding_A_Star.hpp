@@ -3,6 +3,7 @@
 #include "Grid.hpp"
 #include "Node.hpp"
 #include <vector>
+#include <iostream>
 
 class Pathfinding {
 public:

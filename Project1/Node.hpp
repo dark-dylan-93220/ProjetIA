@@ -4,9 +4,9 @@
 
 struct Node {
     sf::Vector2i position;
-    int gCost, hCost, fCost;
+    float gCost, hCost, fCost;
     Node* parent;
 
     Node(sf::Vector2i pos);
-    void calculateCosts(Node* end, int newG);
+    void calculateCosts(Node* end, float newG);
 };

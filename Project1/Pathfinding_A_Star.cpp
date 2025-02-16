@@ -7,9 +7,6 @@ std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, 
     std::vector<Node*> openList;
     std::vector<Node*> allNodes;
 
-	start /= CELL_SIZE;
-	end /= CELL_SIZE;
-
     Node* startNode = new Node(start);
     Node* endNode = new Node(end);
     openList.push_back(startNode);
@@ -43,17 +40,22 @@ std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, 
             {current->position.x - 1, current->position.y + 1}   // Diagonal
         };
 
+        int neighborID = 0;
         for (sf::Vector2i& neighborPos : neighbors) {
             if (neighborPos.x < 0 || neighborPos.x >= GRID_WIDTH || neighborPos.y < 0 || neighborPos.y >= GRID_HEIGHT)
                 continue;
-            if (grid.getCell(neighborPos.x, neighborPos.y).walkable == false || visited[neighborPos.y][neighborPos.x])
+            if (!grid.getCell(neighborPos.x, neighborPos.y).walkable || visited[neighborPos.y][neighborPos.x])
                 continue;
 
             Node* neighbor = new Node(neighborPos);
             neighbor->parent = current;
-            neighbor->calculateCosts(endNode, current->gCost + 1);
+            if(neighborID < 4) // Ligne droite = 1 bloc
+                neighbor->calculateCosts(endNode, current->gCost + 1);
+            else              // Diagonale = sqrt(2) blocs
+                neighbor->calculateCosts(endNode, current->gCost + std::sqrt(2));
             openList.push_back(neighbor);
             allNodes.push_back(neighbor);
+            neighborID++;
         }
     }
 

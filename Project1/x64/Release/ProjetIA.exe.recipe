@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\PC\source\repos\ProjetIA\x64\Debug\ProjetIA.exe</FullPath>
+      <FullPath>C:\Users\PC\source\repos\ProjetIA\x64\Release\ProjetIA.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

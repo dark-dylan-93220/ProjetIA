@@ -1,56 +1,82 @@
 #include "Enemy.hpp"
 #include "Pathfinding_A_Star.hpp"
+
 #include <cmath>
+#include <vector>
+#include <utility>
 #include <iostream>
 
-Enemy::Enemy(float x, float y) : Entity(x, y, sf::Color::Red) 
+namespace {
+    float second = 0;
+    typedef std::pair<std::vector<sf::Vector2i>, std::vector<bool>> followPath_t;
+    followPath_t followPath = { std::vector<sf::Vector2i>{}, std::vector<bool>{} };
+    sf::Vector2i start;
+    sf::Vector2i end;
+}
+
+Enemy::Enemy(float x, float y) : Entity(x, y, sf::Color::Red)
 {
-	position = sf::Vector2i{ static_cast<int>(x), static_cast<int>(y) };
+    position = sf::Vector2i{ static_cast<int>(x), static_cast<int>(y) };
 }
 
 void Enemy::update(float deltaTime, Grid& grid) {
-	moveTowardsPlayer(playerPos, grid, deltaTime);
-	shape.setPosition(position.x, position.y);
+    moveTowardsPlayer(playerPos, grid, deltaTime);
 }
 
 void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime) {
-	// Calculer la distance entre l'ennemi et le joueur
-	float distance = std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
-	std::cout << distance << std::endl;
-	// Si la distance est inférieure à 1 ou supérieure à 100, continuer la patrouille
-	if (distance < 1 || distance > 200) return;
+    float distance = std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
 
-	// Calculer le chemin entre l'ennemi et le joueur
+    if (distance < 1 || distance > 200) return;
 
-	sf::Vector2i start = { static_cast<int>(shape.getPosition().x), static_cast<int>(shape.getPosition().y) };
-	sf::Vector2i end = { static_cast<int>(playerPos.x), static_cast<int>(playerPos.y) };
-	std::vector<sf::Vector2i> path = Pathfinding::findPath(grid, start, end);
+    if (followPath.first.empty() || needsRepath) {
+        start = { static_cast<int>(shape.getPosition().x / CELL_SIZE), static_cast<int>(shape.getPosition().y / CELL_SIZE) };
+        end = { static_cast<int>(playerPos.x / CELL_SIZE),             static_cast<int>(playerPos.y / CELL_SIZE) };
+        std::vector<sf::Vector2i> followPathSteps = Pathfinding::findPath(grid, start, end);
 
-	std::cout << "Start : " << start.x << " " << start.y << std::endl;
-	std::cout << "End : " << end.x << " " << end.y << std::endl;
-	std::cout << "Path : ";
-	for (auto& p : path)
-		std::cout << p.x << " " << p.y;
-	std::cout << std::endl;
+        if (followPathSteps.size() <= 1) return;
+        std::cout << "Chemin calcule : ";
+        for (const auto& step : followPathSteps) {
+            std::cout << "(" << step.x << ", " << step.y << ") ";
+        }
+        std::cout << std::endl;
 
-	// Déplacer l'ennemi vers le joueur
+        followPath = { followPathSteps, std::vector<bool>(followPathSteps.size(), false) };
+        step = 0;
+        needsRepath = false;
+    }
 
-	if (!path.empty() && grid.getCell(path[step].y, path[step].x).walkable) {
-		needsRepath = true;
-	}
-	else {
-		needsRepath = false;
-	}
+    if (!followPath.first.empty() && step < followPath.first.size()) {
+        position = followPath.first[step] * CELL_SIZE;
 
-	if (needsRepath || path.empty()) {
-		path = Pathfinding::findPath(grid, start, end);
-		step = 0;
-		needsRepath = false;
-	}
+        sf::Vector2i shapePos = { (int)shape.getPosition().x, (int)shape.getPosition().y };
 
-	if (!path.empty() && step < path.size()) {
-		position = path[step];
-		if (step != path.size() - 1)
-			step++;
-	}
+        if ((shapePos / CELL_SIZE) == followPath.first[step]) {
+            followPath.second[step] = true;
+            second = 0;
+            step++;
+            if (step == followPath.first.size()) {
+                followPath = { std::vector<sf::Vector2i>{}, std::vector<bool>{} };
+                needsRepath = true;
+                return;
+            }
+        }
+
+        float dx = position.x - shape.getPosition().x;
+        float dy = position.y - shape.getPosition().y;
+        float angle = std::atan2(dy, dx);
+
+        shape.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
+
+        // 1 étape par 60 boucles
+        if (second >= 1) {
+            step++;
+            second = 0;
+        }
+
+        if (step >= followPath.first.size()) {
+            needsRepath = true;
+            step = 0;
+        }
+    }
+    second += deltaTime;
 }
