@@ -5,6 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+
 #include "Enemy.hpp"
 
 enum class NodeState { SUCCESS, FAILURE, RUNNING };
@@ -95,8 +96,9 @@ public:
 };
 
 class PrintMessageNode : public BTNode {
+private:
+    std::string message;
 public:
-    PrintMessageNode() {}
+    PrintMessageNode(const std::string& msg) : message(msg) {}
     NodeState Execute() override;
 };
-

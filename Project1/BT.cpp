@@ -82,6 +82,12 @@ NodeState CheckEnemyProximityNode::Execute() {
     return (blackboard.GetValue(key) == expectedValue) ? NodeState::SUCCESS : NodeState::FAILURE;
 }
 
+//----------------------------PrintMessageNode---------------------------
+NodeState PrintMessageNode::Execute() {
+    std::cout << message << std::endl;
+    return NodeState::SUCCESS;
+}
+
 //----------------------------ActionNode---------------------------------
 NodeState chaseNode::Execute() {
     enemy.chase(1, grid); //suivre
@@ -102,6 +108,3 @@ NodeState patrolNode::Execute() {
     enemy.patrol(1, grid); //fuir
     return NodeState::SUCCESS;
 }
-
-
-

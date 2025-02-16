@@ -8,55 +8,64 @@
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 
-
 int main() {
-   sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Jeu SFML - IA Ennemis");
-   window.setFramerateLimit(60);
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Jeu SFML - IA Ennemis");
+    window.setFramerateLimit(60);
+    
+    sf::Clock clock;
+    sf::Event event;
 
-   Player player(200, 400);
-   std::vector<Enemy> enemies = { Enemy(100, 100), Enemy(700, 100) };
-   int playerDetected = 0;
-   int playerInsight = 0;
-   int lowHP = 0;
-   Grid grid;
-   grid.loadFromFile("map.txt");
-   //BTNode->this(grid); ----------------------------------------------------------------------------------
+    Player player(200, 400);
+    std::vector<Enemy> enemies = { Enemy(100, 100), Enemy(700, 100) };
+    
+    bool playerDetected = false;
+    bool playerInsight = false;
+    bool lowHP = false;
+    
+    Grid grid;
+    grid.loadFromFile("map.txt");
 
-   sf::Clock clock;
+    for (auto& enemy : enemies) {
+        BTNode::makeTree(enemy, playerDetected, playerInsight, lowHP);
+    }
+    
+    //BTNode->this(grid); ----------------------------------------------------------------------------------
+    
+    while (window.isOpen()) {
+        float deltaTime = clock.restart().asSeconds();
+        
+        while (window.pollEvent(event)) 
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+    
+        for (auto& enemy : enemies) 
+        {
+            enemy.playerPos = player.shape.getPosition();
+            enemy.update(deltaTime, grid);
+    
+            if (enemy.playerDetected) playerDetected = true; 
+            else                      playerDetected = false;
+            if (enemy.playerInsight)  playerInsight = true;
+            else                      playerInsight = false; 
+            if (enemy.lowHP)          lowHP = true;
+            else                      lowHP = false;
+        }
 
-   while (window.isOpen()) {
-       sf::Time dt = clock.restart();
-       float deltaTime = dt.asSeconds();
+        player.update(deltaTime, grid);
+    
+        window.clear();
 
-       sf::Event event;
-       while (window.pollEvent(event)) {
-           if (event.type == sf::Event::Closed)
-               window.close();
-       }
+        grid.draw(window);
+        window.draw(player.shape);
+        for (const auto& enemy : enemies) 
+        {
+            window.draw(enemy.shape);
+        }
 
-       player.update(deltaTime, grid);
-
-       for (auto enemy : enemies) {
-           if (enemy.playerDetected) { playerDetected = 1; }
-           else { playerDetected = 0; }
-           if (enemy.playerInsight) { playerInsight = 1; }
-           else { playerInsight = 0; }
-           if (enemy.lowHP) { lowHP = 1; }
-           else { lowHP = 0; }
-           BTNode::makeTree(enemy, playerDetected, playerInsight, lowHP);
-           //-----réinitialise les valeurs--------(pas utile)
-           playerDetected = 0;
-           playerInsight = 0;
-           lowHP = 0;
-       }
-
-       window.clear();
-       grid.draw(window);
-       window.draw(player.shape);
-       for (const auto& enemy : enemies)
-           window.draw(enemy.shape);
-       window.display();
-   }
-
-   return 0;
+        window.display();
+    }
+    
+    return 0;
 }
