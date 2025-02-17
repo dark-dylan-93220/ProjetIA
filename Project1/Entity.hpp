@@ -6,11 +6,15 @@
 
 class Entity {
 public:
+    Entity(float x, float y, sf::Color color, int hp);
     sf::RectangleShape shape;
     sf::Vector2f velocity;
+    int health;
+    virtual void update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> neededEntities) = 0;
 
-    Entity(float x, float y, sf::Color color);
-    virtual void update(float deltaTime, Grid& grid) = 0;
+public:
+    bool isAlive() const;
+    void takeDamage(int damage);
 };
 
 #endif // ENTITY_HPP

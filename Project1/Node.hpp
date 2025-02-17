@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/System/Vector2.hpp>
+#include <cmath>
 
 struct Node {
     sf::Vector2i position;
@@ -8,5 +9,6 @@ struct Node {
     Node* parent;
 
     Node(sf::Vector2i pos);
-    void calculateCosts(Node* end, float newG);
+    void calculateCosts(sf::Vector2i endPos, float newG);
+    int calculateHeuristic(sf::Vector2i endPos);
 };
