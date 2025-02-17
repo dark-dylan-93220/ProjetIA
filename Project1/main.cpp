@@ -43,6 +43,7 @@ int main() {
     auto sequenceEnemyTwo4 = std::make_unique<SequenceNode>();
     Blackboard bb;
 
+
     for (int i = 0; i < 2; ++i) {
         if (i == 0)
             InheritFromEveryone::makeTree(root1, root2, sequenceEnemyOne1, sequenceEnemyOne2, sequenceEnemyOne3, sequenceEnemyOne4, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP, grid);
@@ -101,6 +102,7 @@ int main() {
         for (const auto& enemy : enemies) {
             if (enemy->isAlive()) {
                 window.draw(enemy->shape);
+                window.draw(enemy->circle);
             }
         }
         window.display();

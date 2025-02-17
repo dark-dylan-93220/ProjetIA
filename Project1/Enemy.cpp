@@ -45,10 +45,10 @@ void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTi
     float distance = (float)std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
     playerDetected = false;
     playerInsight = false;
-    /*if (hp de lennemi < 20) {
+    if (health < 20) {
         lowHP = true;
         return;
-    }*/
+    }
 
     if (distance < 1 || distance > 200) return;
     playerDetected = true;
@@ -101,6 +101,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTi
         float angle = std::atan2(dy, dx);
 
         shape.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
+        circle.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
 
         // 1 étape par seconde
         if (second >= 1) {
