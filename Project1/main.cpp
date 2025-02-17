@@ -74,22 +74,25 @@ int main() {
     
         for (auto& enemy : enemies) 
         {
-            // Mise à jour du behavior tree et exécution de ce dernier
-            InheritFromEveryone::executeTree(root1, bb, playerDetected, playerInsight, lowHP);
-            // Mise à jour de la position du joueur pour les ennemis
-            enemy->update(deltaTime, grid, enemies);
-            
+            if (enemy->isAlive()) {
+                // Mise à jour du behavior tree et exécution de ce dernier
+                InheritFromEveryone::executeTree(root1, bb, playerDetected, playerInsight, lowHP);
+                // Mise à jour de la position du joueur pour les ennemis
+                enemy->update(deltaTime, grid, enemies);
+            }
         }
 
         for (auto& enemy : trueEnemies) {
-            enemy->playerPos = player.shape.getPosition();
-            // Mise à jour des valeurs booléennes des ennemis
-            if (enemy->playerDetected) playerDetected = true;
-            else                      playerDetected = false;
-            if (enemy->playerInsight)  playerInsight = true;
-            else                      playerInsight = false;
-            if (enemy->lowHP)          lowHP = true;
-            else                      lowHP = false;
+            if (enemy->isAlive()) {
+                enemy->playerPos = player.shape.getPosition();
+                // Mise à jour des valeurs booléennes des ennemis
+                if (enemy->playerDetected) playerDetected = true;
+                else                       playerDetected = false;
+                if (enemy->playerInsight)  playerInsight = true;
+                else                       playerInsight = false;
+                if (enemy->lowHP)          lowHP = true;
+                else                       lowHP = false;
+            }
         }
 
         player.update(deltaTime, grid, enemies);
