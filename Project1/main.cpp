@@ -25,8 +25,12 @@ int main() {
     Grid grid;
     grid.loadFromFile("map.txt");
 
+    auto root = std::make_unique<SelectorNode>();
+    auto sequence = std::make_unique<SequenceNode>();
+    Blackboard bb;
+
     for (auto& enemy : enemies) {
-        BTNode::makeTree(enemy, playerDetected, playerInsight, lowHP);
+        makeTree(root, sequence, bb, enemy, playerDetected, playerInsight, lowHP);
     }
     
     //BTNode->this(grid); ----------------------------------------------------------------------------------
@@ -42,9 +46,13 @@ int main() {
     
         for (auto& enemy : enemies) 
         {
+            // Mise à jour du behavior tree et exécution de ce dernier
+            updateBlackboard(bb, playerDetected, playerInsight, lowHP);
+            executeTree(root);
+            // Mise à jour de la position du joueur pour les ennemis
             enemy.playerPos = player.shape.getPosition();
             enemy.update(deltaTime, grid);
-    
+            // Mise à jour des valeurs booléennes des ennemis
             if (enemy.playerDetected) playerDetected = true; 
             else                      playerDetected = false;
             if (enemy.playerInsight)  playerInsight = true;

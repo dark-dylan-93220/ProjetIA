@@ -23,8 +23,6 @@ public:
     Grid grid;
     virtual ~BTNode() = default;
     virtual NodeState Execute() = 0;
-
-    static void makeTree(Enemy& enemy, int playerDetected, int playerInsight, int lowHP);
 };
 
 class SequenceNode : public BTNode {
@@ -43,21 +41,13 @@ public:
     NodeState Execute() override;
 };
 
-class Blackboard {
-private:
-    std::unordered_map<std::string, int> data;
-public:
-    void SetValue(const std::string& key, int value);
-    int GetValue(const std::string& key);
-};
-
 class ConditionNode : public BTNode {
 private:
     Blackboard& blackboard;
     std::string key;
-    int expectedValue;
+    bool expectedValue;
 public:
-    ConditionNode(Blackboard& bb, const std::string& key, int value) : blackboard(bb), key(key), expectedValue(value) {}
+    ConditionNode(Blackboard& bb, const std::string& key, bool value) : blackboard(bb), key(key), expectedValue(value) {}
     NodeState Execute() override;
 };
 
@@ -65,14 +55,14 @@ class CheckEnemyProximityNode : public BTNode {
 private:
     Blackboard& blackboard;
     std::string key;
-    int expectedValue;
+    bool expectedValue;
 public:
-    CheckEnemyProximityNode(Blackboard& bb, const std::string& key, int value) : blackboard(bb), key(key), expectedValue(value) {}
+    CheckEnemyProximityNode(Blackboard& bb, const std::string& key, bool value) : blackboard(bb), key(key), expectedValue(value) {}
     NodeState Execute() override;
 };
 
 class chaseNode : public BTNode {
-private:    
+private:
     Enemy& enemy;
 public:
     chaseNode(Enemy& enemy) : enemy(enemy) {}
