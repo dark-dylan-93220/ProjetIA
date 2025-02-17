@@ -1,21 +1,39 @@
 #include "Pathfinding_A_Star.hpp"
 #include <queue>
-#include <algorithm>
+#include <unordered_map>
+
+class CompareNodePtr {
+public:
+    bool operator()(const Node* a, const Node* b) const {
+        return a->fCost > b->fCost;
+    }
+};
+
+struct Vector2iHash {
+    std::size_t operator()(const sf::Vector2i& v) const {
+        return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1);
+    }
+};
 
 std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, sf::Vector2i end) {
-    std::vector<std::vector<bool>> visited(GRID_HEIGHT, std::vector<bool>(GRID_WIDTH, false));
-    std::vector<Node*> openList;
-    std::vector<Node*> allNodes;
+    std::priority_queue<Node*, std::vector<Node*>, CompareNodePtr> openQueue;
+    std::unordered_map<sf::Vector2i, Node*, Vector2iHash> allNodes;
+    std::vector<sf::Vector2i> directions = {
+        {0, 1}, {1, 0}, {0, -1}, {-1, 0},
+        {-1, -1}, {1, -1}, {1, 1}, {-1, 1}
+    };
 
     Node* startNode = new Node(start);
-    Node* endNode = new Node(end);
-    openList.push_back(startNode);
-    allNodes.push_back(startNode);
+    startNode->gCost = 0;
+    startNode->hCost = startNode->calculateHeuristic(end);
+    startNode->fCost = startNode->gCost + startNode->hCost;
 
-    while (!openList.empty()) {
-        std::sort(openList.begin(), openList.end(), [](Node* a, Node* b) { return a->fCost < b->fCost; });
-        Node* current = openList.front();
-        openList.erase(openList.begin());
+    openQueue.push(startNode);
+    allNodes[start] = startNode;
+
+    while (!openQueue.empty()) {
+        Node* current = openQueue.top();
+        openQueue.pop();
 
         if (current->position == end) {
             std::vector<sf::Vector2i> path;
@@ -24,43 +42,47 @@ std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, 
                 current = current->parent;
             }
             std::reverse(path.begin(), path.end());
+
+            for (auto& pair : allNodes) delete pair.second;
             return path;
         }
 
-        visited[current->position.y][current->position.x] = true;
+        for (auto& dir : directions) {
+            sf::Vector2i neighborPos = current->position + dir;
 
-        std::vector<sf::Vector2i> neighbors = {
-            {current->position.x + 1, current->position.y},
-            {current->position.x - 1, current->position.y},
-            {current->position.x, current->position.y + 1},
-            {current->position.x, current->position.y - 1},
-            {current->position.x + 1, current->position.y + 1},  // Diagonal
-            {current->position.x - 1, current->position.y - 1},  // Diagonal
-            {current->position.x + 1, current->position.y - 1},  // Diagonal
-            {current->position.x - 1, current->position.y + 1}   // Diagonal
-        };
-
-        int neighborID = 0;
-        for (sf::Vector2i& neighborPos : neighbors) {
             if (neighborPos.x < 0 || neighborPos.x >= GRID_WIDTH || neighborPos.y < 0 || neighborPos.y >= GRID_HEIGHT)
                 continue;
-            if (!grid.getCell(neighborPos.x, neighborPos.y).walkable || visited[neighborPos.y][neighborPos.x])
+            if (!grid.getCell(neighborPos.x, neighborPos.x).walkable)
                 continue;
 
-            Node* neighbor = new Node(neighborPos);
-            neighbor->parent = current;
-            if(neighborID < 4) // Ligne droite = 1 bloc
-                neighbor->calculateCosts(endNode, current->gCost + 1);
-            else              // Diagonale = sqrt(2) blocs
-                neighbor->calculateCosts(endNode, current->gCost + (float)std::sqrt(2));
-            openList.push_back(neighbor);
-            allNodes.push_back(neighbor);
-            neighborID++;
+            if ((dir.x != 0 && dir.y != 0) &&
+                (!grid.getCell(current->position.y, neighborPos.x).walkable || !grid.getCell(neighborPos.y, current->position.x).walkable))
+                continue;
+
+            float newGCost = current->gCost + ((dir.x != 0 && dir.y != 0) ? 14.12f : 10.f); // 10 for straight, 14 for diagonal
+
+            Node* neighbor;
+            if (allNodes.find(neighborPos) != allNodes.end()) {
+                neighbor = allNodes[neighborPos];
+                if (newGCost < neighbor->gCost) {
+                    neighbor->gCost = newGCost;
+                    neighbor->fCost = newGCost + neighbor->hCost;
+                    neighbor->parent = current;
+                    openQueue.push(neighbor);
+                }
+            }
+            else {
+                neighbor = new Node(neighborPos);
+                neighbor->gCost = newGCost;
+                neighbor->hCost = neighbor->calculateHeuristic(end);
+                neighbor->fCost = neighbor->gCost + neighbor->hCost;
+                neighbor->parent = current;
+                openQueue.push(neighbor);
+                allNodes[neighborPos] = neighbor;
+            }
         }
     }
 
-    for (Node* node : allNodes)
-        delete node;
-
+    for (auto& pair : allNodes) delete pair.second;
     return {};
 }

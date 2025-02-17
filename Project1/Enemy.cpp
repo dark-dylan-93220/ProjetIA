@@ -14,7 +14,7 @@ namespace {
     sf::Vector2i end;
 }
 
-Enemy::Enemy(float x, float y) : Entity(x, y, sf::Color::Red)
+Enemy::Enemy(float x, float y, int hp) : Entity(x, y, sf::Color::Red, hp)
 {
     needsRepath = false;
     lowHP = false;
@@ -23,8 +23,9 @@ Enemy::Enemy(float x, float y) : Entity(x, y, sf::Color::Red)
     position = sf::Vector2i{ static_cast<int>(x), static_cast<int>(y) };
 }
 
-void Enemy::update(float deltaTime, Grid& grid) {
-    moveTowardsPlayer(playerPos, grid, deltaTime);
+void Enemy::update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) {
+    if(isAlive()) 
+        moveTowardsPlayer(playerPos, grid, deltaTime);
 }
 
 void Enemy::chase(float deltaTime, Grid& grid) {

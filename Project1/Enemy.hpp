@@ -19,10 +19,10 @@ private:
     sf::Vector2i position;
     
 public:
-    Enemy(float x, float y);
-    
+    Enemy(float x, float y, int hp);
+
 public:
-    void update(float deltaTime, Grid& grid) override;
+    void update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) override;
 	void moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime);
     void chase(float deltaTime, Grid& grid);
     void attack(float deltaTime, Grid& grid);
