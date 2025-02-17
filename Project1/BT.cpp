@@ -1,43 +1,5 @@
 #include "BT.hpp"
 
-
-void BTNode::makeTree(Enemy& enemy, int playerDetected, int playerInsight, int lowHP) {
-    Blackboard bb;
-    bb.SetValue("playerDetected", playerDetected);
-    bb.SetValue("playerInsight", playerInsight);
-    bb.SetValue("lowHP", lowHP);
-
-    auto root = std::make_unique<SelectorNode>();
-
-    auto sequence = std::make_unique<SequenceNode>();
-    sequence->AddChild(std::make_unique<ConditionNode>(bb, "lowHP", 1));
-    sequence->AddChild(std::make_unique<fleeNode>(enemy));
-
-    root->AddChild(std::move(sequence));
-
-    auto root2 = std::make_unique<SelectorNode>();
-
-    auto sequence2 = std::make_unique<SequenceNode>();
-    sequence2->AddChild(std::make_unique<ConditionNode>(bb, "playerDetected", 1));
-    sequence2->AddChild(std::make_unique<chaseNode>(enemy));
-
-    auto sequence3 = std::make_unique<SequenceNode>();
-    sequence3->AddChild(std::make_unique<ConditionNode>(bb, "playerInsight", 1));
-    sequence3->AddChild(std::make_unique<attackNode>(enemy));
-
-    root2->AddChild(std::move(sequence2));
-    root2->AddChild(std::move(sequence3));
-
-    root->AddChild(std::move(root2));
-
-    auto sequence4 = std::make_unique<SequenceNode>();
-    sequence4->AddChild(std::make_unique<patrolNode>(enemy));
-
-    root->AddChild(std::move(sequence4));
-
-    root->Execute();
-}
-
 //--------------------------SequenceNode------------------------------
 void SequenceNode::AddChild(std::unique_ptr<BTNode> child) {
     children.push_back(std::move(child));
@@ -65,10 +27,10 @@ NodeState SelectorNode::Execute() {
 }
 
 //----------------------------Blackboard---------------------------------
-void Blackboard::SetValue(const std::string& key, int value) {
+void Blackboard::SetValue(const std::string& key, bool value) {
     data[key] = value;
 }
-int Blackboard::GetValue(const std::string& key) {
+bool Blackboard::GetValue(const std::string& key) {
     return data[key];
 }
 
@@ -107,4 +69,38 @@ NodeState fleeNode::Execute() {
 NodeState patrolNode::Execute() {
     enemy.patrol(1, grid); //fuir
     return NodeState::SUCCESS;
+}
+
+void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SequenceNode>& sequence, Blackboard& bb, Enemy& enemy,
+    bool& playerDetected, bool& playerInsight, bool& lowHP)
+{
+    // Inscription des "valeurs" sur le blackboard
+    bb.SetValue("playerDetected", playerDetected);
+    bb.SetValue("playerInsight", playerInsight);
+    bb.SetValue("lowHP", lowHP);
+
+    // Ajout des ordres au noeud séquence
+        // LowHP
+    sequence->AddChild(std::make_unique<ConditionNode>(bb, "lowHP", 1));
+    sequence->AddChild(std::make_unique<fleeNode>(enemy));
+    // PlayerDetected
+    sequence->AddChild(std::make_unique<ConditionNode>(bb, "playerDetected", 1));
+    sequence->AddChild(std::make_unique<chaseNode>(enemy));
+    // PlayerInsight
+    sequence->AddChild(std::make_unique<ConditionNode>(bb, "playerInsight", 1));
+    sequence->AddChild(std::make_unique<attackNode>(enemy));
+    sequence->AddChild(std::make_unique<patrolNode>(enemy));
+
+    // Ajout du noeud séquence au noeud racine
+    root->AddChild(std::move(sequence));
+}
+
+void InheritFromEveryone::executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP)
+{
+    // Mise à jour des "valeurs" sur le blackboard
+    bb.SetValue("playerDetected", playerDetected);
+    bb.SetValue("playerInsight", playerInsight);
+    bb.SetValue("lowHP", lowHP);
+    // Exécution du noeud racine
+    root->Execute();
 }

@@ -10,13 +10,19 @@
 
 enum class NodeState { SUCCESS, FAILURE, RUNNING };
 
+class Blackboard {
+private:
+    std::unordered_map<std::string, bool> data;
+public:
+    void SetValue(const std::string& key, bool value);
+    bool GetValue(const std::string& key);
+};
+
 class BTNode {
 public:
     Grid grid;
     virtual ~BTNode() = default;
     virtual NodeState Execute() = 0;
-
-    static void makeTree(Enemy& enemy, int playerDetected, int playerInsight, int lowHP);
 };
 
 class SequenceNode : public BTNode {
@@ -35,21 +41,13 @@ public:
     NodeState Execute() override;
 };
 
-class Blackboard {
-private:
-    std::unordered_map<std::string, int> data;
-public:
-    void SetValue(const std::string& key, int value);
-    int GetValue(const std::string& key);
-};
-
 class ConditionNode : public BTNode {
 private:
     Blackboard& blackboard;
     std::string key;
-    int expectedValue;
+    bool expectedValue;
 public:
-    ConditionNode(Blackboard& bb, const std::string& key, int value) : blackboard(bb), key(key), expectedValue(value) {}
+    ConditionNode(Blackboard& bb, const std::string& key, bool value) : blackboard(bb), key(key), expectedValue(value) {}
     NodeState Execute() override;
 };
 
@@ -57,14 +55,14 @@ class CheckEnemyProximityNode : public BTNode {
 private:
     Blackboard& blackboard;
     std::string key;
-    int expectedValue;
+    bool expectedValue;
 public:
-    CheckEnemyProximityNode(Blackboard& bb, const std::string& key, int value) : blackboard(bb), key(key), expectedValue(value) {}
+    CheckEnemyProximityNode(Blackboard& bb, const std::string& key, bool value) : blackboard(bb), key(key), expectedValue(value) {}
     NodeState Execute() override;
 };
 
 class chaseNode : public BTNode {
-private:    
+private:
     Enemy& enemy;
 public:
     chaseNode(Enemy& enemy) : enemy(enemy) {}
@@ -101,4 +99,12 @@ private:
 public:
     PrintMessageNode(const std::string& msg) : message(msg) {}
     NodeState Execute() override;
+};
+
+class InheritFromEveryone : public SelectorNode, public SequenceNode, public Blackboard {
+public:
+    static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SequenceNode>& sequence, Blackboard& bb, Enemy& enemy,
+        bool& playerDetected, bool& playerInsight, bool& lowHP);
+
+    static void executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP);
 };

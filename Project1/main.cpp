@@ -25,8 +25,16 @@ int main() {
     Grid grid;
     grid.loadFromFile("map.txt");
 
-    for (auto& enemy : enemies) {
-        BTNode::makeTree(enemy, playerDetected, playerInsight, lowHP);
+    auto root = std::make_unique<SelectorNode>();
+    auto sequenceEnemyOne = std::make_unique<SequenceNode>();
+    auto sequenceEnemyTwo = std::make_unique<SequenceNode>();
+    Blackboard bb;
+
+    for (int i = 0; i < 2; ++i) {
+        if(i == 0)
+            InheritFromEveryone::makeTree(root, sequenceEnemyOne, bb, enemies[i], playerDetected, playerInsight, lowHP);
+        else
+            InheritFromEveryone::makeTree(root, sequenceEnemyTwo, bb, enemies[i], playerDetected, playerInsight, lowHP);
     }
     
     //BTNode->this(grid); ----------------------------------------------------------------------------------
@@ -42,9 +50,12 @@ int main() {
     
         for (auto& enemy : enemies) 
         {
+            // Mise à jour du behavior tree et exécution de ce dernier
+            InheritFromEveryone::executeTree(root, bb, playerDetected, playerInsight, lowHP);
+            // Mise à jour de la position du joueur pour les ennemis
             enemy.playerPos = player.shape.getPosition();
             enemy.update(deltaTime, grid);
-    
+            // Mise à jour des valeurs booléennes des ennemis
             if (enemy.playerDetected) playerDetected = true; 
             else                      playerDetected = false;
             if (enemy.playerInsight)  playerInsight = true;
