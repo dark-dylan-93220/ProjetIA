@@ -12,7 +12,6 @@ public:
 
 private:
     bool needsRepath;
-
     int step = 0;
     static constexpr float SPEED = 100.0f;
 
