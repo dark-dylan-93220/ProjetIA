@@ -52,7 +52,7 @@ std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, 
             if(neighborID < 4) // Ligne droite = 1 bloc
                 neighbor->calculateCosts(endNode, current->gCost + 1);
             else              // Diagonale = sqrt(2) blocs
-                neighbor->calculateCosts(endNode, current->gCost + std::sqrt(2));
+                neighbor->calculateCosts(endNode, current->gCost + (float)std::sqrt(2));
             openList.push_back(neighbor);
             allNodes.push_back(neighbor);
             neighborID++;

@@ -8,6 +8,6 @@ void Node::calculateCosts(Node* end, float newG) {
     gCost = newG;
     int dx = position.x - end->position.x;
     int dy = position.y - end->position.y;
-    hCost = std::sqrt(dx * dx + dy * dy);  // Distance Euclidienne
+    hCost = (float)std::sqrt(dx * dx + dy * dy);  // Distance Euclidienne
     fCost = gCost + hCost;
 }
