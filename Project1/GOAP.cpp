@@ -7,15 +7,7 @@ GOAPAgent::GOAPAgent() {
 std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState, Goal& goal) {
     std::vector<std::unique_ptr<Action>> plan;
 
-    if (goal == Goal::Manger) {
-        if (initialState.GetHunger() > 0 && !initialState.HasFood()) {
-            plan.push_back(std::move(std::make_unique<SearchFoodAction>()));
-            plan.push_back(std::move(std::make_unique<EatAction>()));
-        }
-        else if (initialState.HasFood()) {
-            plan.push_back(std::move(std::make_unique<EatAction>()));
-        }
-    }
+    
 
     return plan;
 }
