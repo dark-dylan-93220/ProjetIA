@@ -27,16 +27,27 @@ int main() {
     Grid grid;
     grid.loadFromFile("map.txt");
 
-    auto root = std::make_unique<SelectorNode>();
-    auto sequenceEnemyOne = std::make_unique<SequenceNode>();
-    auto sequenceEnemyTwo = std::make_unique<SequenceNode>();
+    auto root1 = std::make_unique<SelectorNode>();
+    auto root2 = std::make_unique<SelectorNode>();
+    auto root3 = std::make_unique<SelectorNode>();
+    auto root4 = std::make_unique<SelectorNode>();
+
+    auto sequenceEnemyOne1 = std::make_unique<SequenceNode>();
+    auto sequenceEnemyOne2 = std::make_unique<SequenceNode>();
+    auto sequenceEnemyOne3 = std::make_unique<SequenceNode>();
+    auto sequenceEnemyOne4 = std::make_unique<SequenceNode>();
+
+    auto sequenceEnemyTwo1 = std::make_unique<SequenceNode>();
+    auto sequenceEnemyTwo2 = std::make_unique<SequenceNode>();
+    auto sequenceEnemyTwo3 = std::make_unique<SequenceNode>();
+    auto sequenceEnemyTwo4 = std::make_unique<SequenceNode>();
     Blackboard bb;
 
     for (int i = 0; i < 2; ++i) {
-        if(i == 0)
-            InheritFromEveryone::makeTree(root, sequenceEnemyOne, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP);
+        if (i == 0)
+            InheritFromEveryone::makeTree(root1, root2, sequenceEnemyOne1, sequenceEnemyOne2, sequenceEnemyOne3, sequenceEnemyOne4, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP, grid);
         else
-            InheritFromEveryone::makeTree(root, sequenceEnemyTwo, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP);
+            InheritFromEveryone::makeTree(root3, root4, sequenceEnemyTwo1, sequenceEnemyTwo2, sequenceEnemyTwo3, sequenceEnemyTwo4, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP, grid);
     }
 
     GOAPAgent agent;
@@ -64,7 +75,7 @@ int main() {
         for (auto& enemy : enemies) 
         {
             // Mise à jour du behavior tree et exécution de ce dernier
-            InheritFromEveryone::executeTree(root, bb, playerDetected, playerInsight, lowHP);
+            InheritFromEveryone::executeTree(root1, bb, playerDetected, playerInsight, lowHP);
             // Mise à jour de la position du joueur pour les ennemis
             enemy->update(deltaTime, grid, enemies);
             

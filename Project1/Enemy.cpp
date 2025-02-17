@@ -43,8 +43,21 @@ void Enemy::flee(float deltaTime, Grid& grid) {
 
 void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime) {
     float distance = (float)std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
+    playerDetected = false;
+    playerInsight = false;
+    /*if (hp de lennemi < 20) {
+        lowHP = true;
+        return;
+    }*/
 
     if (distance < 1 || distance > 200) return;
+    playerDetected = true;
+    playerInsight = false;
+
+    if (distance < CELL_SIZE) {
+        playerDetected = false;
+        playerInsight = true; 
+    }
 
     if (followPath.first.empty() || needsRepath) {
         start = { static_cast<int>(shape.getPosition().x / CELL_SIZE), static_cast<int>(shape.getPosition().y / CELL_SIZE) };
@@ -61,7 +74,6 @@ void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTi
 
         // A partir d'ici, l'ennemi chasse
         followPath = { followPathSteps, std::vector<bool>(followPathSteps.size(), false) };
-        chase(deltaTime, grid);
 
         // Réinitialisation des valeurs clés du chemin à 0
         step = 0;
