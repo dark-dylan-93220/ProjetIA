@@ -1,7 +1,8 @@
 #include <SFML/Graphics.hpp>
-#include <vector>
+
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "GOAP.hpp"
 #include "Grid.hpp"
 #include "BT.hpp"
 
@@ -36,6 +37,17 @@ int main() {
         else
             InheritFromEveryone::makeTree(root, sequenceEnemyTwo, bb, enemies[i], playerDetected, playerInsight, lowHP);
     }
+
+    GOAPAgent agent;
+
+    std::cout << "Etat initial de l'agent:\n";
+    agent.PrintState();
+
+    std::cout << "\nL'agent commence ses actions...\n";
+    agent.PerformActions();  // L'agent va chercher de la nourriture, puis manger
+
+    std::cout << "\nEtat de l'agent après avoir effectue les actions:\n";
+    agent.PrintState();
     
     //BTNode->this(grid); ----------------------------------------------------------------------------------
     

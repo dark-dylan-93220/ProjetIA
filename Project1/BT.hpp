@@ -101,6 +101,7 @@ public:
     NodeState Execute() override;
 };
 
+// Méthode douteuse, c'est vrai... Mais bon au moins ça marche
 class InheritFromEveryone : public SelectorNode, public SequenceNode, public Blackboard {
 public:
     static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SequenceNode>& sequence, Blackboard& bb, Enemy& enemy,
