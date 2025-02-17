@@ -41,7 +41,7 @@ void Enemy::flee(float deltaTime, Grid& grid) {
 }
 
 void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime) {
-    float distance = std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
+    float distance = (float)std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
 
     if (distance < 1 || distance > 200) return;
 

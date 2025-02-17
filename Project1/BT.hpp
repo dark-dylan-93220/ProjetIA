@@ -15,7 +15,7 @@ private:
     std::unordered_map<std::string, bool> data;
 public:
     void SetValue(const std::string& key, bool value);
-    int GetValue(const std::string& key);
+    bool GetValue(const std::string& key);
 };
 
 class BTNode {
@@ -101,9 +101,10 @@ public:
     NodeState Execute() override;
 };
 
-static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SequenceNode>& sequence, Blackboard& bb, Enemy& enemy, 
-    bool& playerDetected, bool& playerInsight, bool& lowHP);
+class InheritFromEveryone : public SelectorNode, public SequenceNode, public Blackboard {
+public:
+    static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SequenceNode>& sequence, Blackboard& bb, Enemy& enemy,
+        bool& playerDetected, bool& playerInsight, bool& lowHP);
 
-static void updateBlackboard(Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP);
-
-static void executeTree(std::unique_ptr<SelectorNode>& root);
+    static void executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP);
+};
