@@ -1,15 +1,15 @@
 #include "BT.hpp"
 
-static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SequenceNode>& sequence, Blackboard& bb, Enemy& enemy, 
-    bool& playerDetected, bool& playerInsight, bool& lowHP) 
-{
-    // Inscription des "valeurs" sur le blackboard
+
+void BTNode::makeTree(Enemy& enemy, int playerDetected, int playerInsight, int lowHP) {
+    Blackboard bb;
     bb.SetValue("playerDetected", playerDetected);
     bb.SetValue("playerInsight", playerInsight);
     bb.SetValue("lowHP", lowHP);
 
-    // Ajout des ordres au noeud séquence
-        // LowHP
+    auto root = std::make_unique<SelectorNode>();
+
+    auto sequence = std::make_unique<SequenceNode>();
     sequence->AddChild(std::make_unique<ConditionNode>(bb, "lowHP", 1));
     sequence->AddChild(std::make_unique<fleeNode>(enemy));
         // PlayerDetected
@@ -19,18 +19,30 @@ static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<Sequen
     sequence->AddChild(std::make_unique<ConditionNode>(bb, "playerInsight", 1));
     sequence->AddChild(std::make_unique<attackNode>(enemy));
     sequence->AddChild(std::make_unique<patrolNode>(enemy));
-    
+
     // Ajout du noeud séquence au noeud racine
     root->AddChild(std::move(sequence));
 }
 
-static void updateBlackboard(Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP) 
-{
-    // Mise à jour des "valeurs" sur le blackboard
-    bb.SetValue("playerDetected", playerDetected);
-    bb.SetValue("playerInsight", playerInsight);
-    bb.SetValue("lowHP", lowHP);
-}
+    auto root2 = std::make_unique<SelectorNode>();
+
+    auto sequence2 = std::make_unique<SequenceNode>();
+    sequence2->AddChild(std::make_unique<ConditionNode>(bb, "playerDetected", 1));
+    sequence2->AddChild(std::make_unique<chaseNode>(enemy));
+
+    auto sequence3 = std::make_unique<SequenceNode>();
+    sequence3->AddChild(std::make_unique<ConditionNode>(bb, "playerInsight", 1));
+    sequence3->AddChild(std::make_unique<attackNode>(enemy));
+
+    root2->AddChild(std::move(sequence2));
+    root2->AddChild(std::move(sequence3));
+
+    root->AddChild(std::move(root2));
+
+    auto sequence4 = std::make_unique<SequenceNode>();
+    sequence4->AddChild(std::make_unique<patrolNode>(enemy));
+
+    root->AddChild(std::move(sequence4));
 
 static void executeTree(std::unique_ptr<SelectorNode>& root) 
 {
@@ -65,7 +77,7 @@ NodeState SelectorNode::Execute() {
 }
 
 //----------------------------Blackboard---------------------------------
-void Blackboard::SetValue(const std::string& key, bool value) {
+void Blackboard::SetValue(const std::string& key, int value) {
     data[key] = value;
 }
 int Blackboard::GetValue(const std::string& key) {

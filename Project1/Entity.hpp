@@ -6,7 +6,7 @@
 
 class Entity {
 public:
-   sf::RectangleShape shape;
+    sf::RectangleShape shape;
     sf::Vector2f velocity;
 
     Entity(float x, float y, sf::Color color);

@@ -1,20 +1,31 @@
-#ifndef ENEMY_HPP
-#define ENEMY_HPP
+#pragma once
 
 #include "Entity.hpp"
 
 class Enemy : public Entity {
 public:
+    bool playerDetected; 
+    bool playerInsight; 
+    bool lowHP;
+
     sf::Vector2f playerPos;
-    static constexpr float SPEED = 100.0f;
-    Enemy(float x, float y);
-    void update(float deltaTime, Grid& grid) override;
 
 private:
-    sf::Vector2i position;
-	bool needsRepath = false;
-    int step = 0;
-	void moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime);
-};
+    bool needsRepath;
 
-#endif // !ENEMY_HPP
+    int step = 0;
+    static constexpr float SPEED = 100.0f;
+
+    sf::Vector2i position;
+    
+public:
+    Enemy(float x, float y);
+    
+public:
+    void update(float deltaTime, Grid& grid) override;
+	void moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime);
+    void chase(float deltaTime, Grid& grid);
+    void attack(float deltaTime, Grid& grid);
+    void patrol(float deltaTime, Grid& grid);
+    void flee(float deltaTime, Grid& grid);
+};

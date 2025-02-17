@@ -16,11 +16,28 @@ namespace {
 
 Enemy::Enemy(float x, float y) : Entity(x, y, sf::Color::Red)
 {
+    needsRepath = false;
+    lowHP = false;
+    playerDetected = false;
+    playerInsight = false;
     position = sf::Vector2i{ static_cast<int>(x), static_cast<int>(y) };
 }
 
 void Enemy::update(float deltaTime, Grid& grid) {
     moveTowardsPlayer(playerPos, grid, deltaTime);
+}
+
+void Enemy::chase(float deltaTime, Grid& grid) {
+    std::cout << "chase" << std::endl;
+}
+void Enemy::attack(float deltaTime, Grid& grid) {
+    std::cout << "attack" << std::endl;
+}
+void Enemy::patrol(float deltaTime, Grid& grid) {
+    std::cout << "patrol" << std::endl;
+}
+void Enemy::flee(float deltaTime, Grid& grid) {
+    std::cout << "flee" << std::endl;
 }
 
 void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime) {
@@ -33,6 +50,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTi
         end = { static_cast<int>(playerPos.x / CELL_SIZE),             static_cast<int>(playerPos.y / CELL_SIZE) };
         std::vector<sf::Vector2i> followPathSteps = Pathfinding::findPath(grid, start, end);
 
+        // Le chemin est pris en compte seulement s'il contient plus de 2 étapes
         if (followPathSteps.size() <= 1) return;
         std::cout << "Chemin calcule : ";
         for (const auto& step : followPathSteps) {
@@ -40,7 +58,11 @@ void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTi
         }
         std::cout << std::endl;
 
+        // A partir d'ici, l'ennemi chasse
         followPath = { followPathSteps, std::vector<bool>(followPathSteps.size(), false) };
+        chase(deltaTime, grid);
+
+        // Réinitialisation des valeurs clés du chemin à 0
         step = 0;
         needsRepath = false;
     }
@@ -67,7 +89,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTi
 
         shape.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
 
-        // 1 étape par 60 boucles
+        // 1 étape par seconde
         if (second >= 1) {
             step++;
             second = 0;
