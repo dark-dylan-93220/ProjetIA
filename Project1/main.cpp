@@ -16,13 +16,15 @@ int main() {
     sf::Clock clock;
     sf::Event event;
 
-    Player player(400, 400, 10);
-    std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100, 100, 10), std::make_shared<Enemy>(700, 100, 100) };
-    std::vector<std::shared_ptr<Enemy>> trueEnemies = { std::dynamic_pointer_cast<Enemy>(enemies[0]), std::dynamic_pointer_cast<Enemy>(enemies[1]) };
+    int timer = 0;
+
+    std::vector<std::shared_ptr<Entity>> players = { std::make_shared<Player>(400, 400, 50) };
+    std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100, 100, 1), std::make_shared<Enemy>(700, 100, 100) };
+    //std::vector<std::shared_ptr<Enemy>> trueEnemies = { std::dynamic_pointer_cast<Enemy>(enemies[0]), std::dynamic_pointer_cast<Enemy>(enemies[1]) };
     
-    bool playerDetected = false;
-    bool playerInsight = false;
-    bool lowHP = false;
+    //bool playerDetected = false;
+    //bool playerInsight = false;
+    //bool lowHP = false;
     
     Grid grid;
     grid.loadFromFile("map.txt");
@@ -45,9 +47,9 @@ int main() {
 
     for (int i = 0; i < 2; ++i) {
         if (i == 0)
-            InheritFromEveryone::makeTree(root1, root2, sequenceEnemyOne1, sequenceEnemyOne2, sequenceEnemyOne3, sequenceEnemyOne4, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP, grid);
+            InheritFromEveryone::makeTree(root1, root2, sequenceEnemyOne1, sequenceEnemyOne2, sequenceEnemyOne3, sequenceEnemyOne4, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
         else
-            InheritFromEveryone::makeTree(root3, root4, sequenceEnemyTwo1, sequenceEnemyTwo2, sequenceEnemyTwo3, sequenceEnemyTwo4, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP, grid);
+            InheritFromEveryone::makeTree(root3, root4, sequenceEnemyTwo1, sequenceEnemyTwo2, sequenceEnemyTwo3, sequenceEnemyTwo4, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
     }
 
     GOAPAgent agent;
@@ -74,36 +76,49 @@ int main() {
     
         for (auto& enemy : enemies) 
         {
+            std::cout << "Etat enemi " << enemy.get() << " : ";
+            //std::cout << std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected << std::endl;
             if (enemy->isAlive()) {
                 // Mise à jour du behavior tree et exécution de ce dernier
-                InheritFromEveryone::executeTree(root1, bb, playerDetected, playerInsight, lowHP);
+                if(std::dynamic_pointer_cast<Enemy>(enemy) == enemy)
+                    InheritFromEveryone::executeTree(root1, bb, std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected, std::dynamic_pointer_cast<Enemy>(enemy)->playerInsight, std::dynamic_pointer_cast<Enemy>(enemy)->lowHP);
                 // Mise à jour de la position du joueur pour les ennemis
-                enemy->update(deltaTime, grid, enemies);
+                enemy->update(deltaTime, grid, players);
             }
         }
 
-        for (auto& enemy : trueEnemies) {
-            if (enemy->isAlive()) {
-                enemy->playerPos = player.shape.getPosition();
-                // Mise à jour des valeurs booléennes des ennemis
-                if (enemy->playerDetected) playerDetected = true;
-                else                       playerDetected = false;
-                if (enemy->playerInsight)  playerInsight = true;
-                else                       playerInsight = false;
-                if (enemy->lowHP)          lowHP = true;
-                else                       lowHP = false;
+        //for (auto& enemy : trueEnemies) {
+        //    if (enemy->isAlive()) {
+        //        enemy->playerPos = player.shape.getPosition();
+        //        // Mise à jour des valeurs booléennes des ennemis
+        //        if (enemy->playerDetected) playerDetected = true;
+        //        else                       playerDetected = false;
+        //        if (enemy->playerInsight)  playerInsight = true;
+        //        else                       playerInsight = false;
+        //        if (enemy->lowHP)          lowHP = true;
+        //        else                       lowHP = false;
+        //    }
+        //}
+
+        players[0]->update(deltaTime, grid, enemies);
+        for (int  i = 0; i < 2; i++) {
+            if (enemies[i]->getStatutAtk() && (timer == 0)) {
+                players[0]->health -= 10;
+                if (players[0]->health <= 0) { players[0]->health = 0; }
             }
         }
-
-        player.update(deltaTime, grid, enemies);
-    
+        timer++;
+        if (timer == 60) { timer = 0; }// l'enemi peut attaquer le joueur toutes les secondes
+        std::cout << "player health : " << players[0]->health << std::endl;
+        std::cout << "-----------------------------------------" << std::endl;
         window.clear();
 
         grid.draw(window);
-        window.draw(player.shape);
+        window.draw(players[0]->shape);
         for (const auto& enemy : enemies) {
             if (enemy->isAlive()) {
                 window.draw(enemy->shape);
+                window.draw(enemy->circle);
             }
         }
         window.display();

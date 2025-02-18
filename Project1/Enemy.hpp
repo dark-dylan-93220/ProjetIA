@@ -22,9 +22,10 @@ public:
 
 public:
     void update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) override;
-	void moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime);
+	void moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTime);
     void chase(float deltaTime, Grid& grid);
     void attack(float deltaTime, Grid& grid);
     void patrol(float deltaTime, Grid& grid);
     void flee(float deltaTime, Grid& grid);
+    
 };
