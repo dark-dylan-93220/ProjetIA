@@ -68,36 +68,36 @@ public:
 
 class chaseNode : public BTNode {
 private:
-    Enemy& enemy;
+    std::shared_ptr<Enemy> enemy;
 public:
-    chaseNode(Enemy& enemy) : enemy(enemy) {}
+    chaseNode(std::shared_ptr<Enemy> enemy) : enemy(enemy) {}
     void addGrid(Grid& _grid) override;
     NodeState Execute() override;
 };
 
 class attackNode : public BTNode {
 private:
-    Enemy& enemy;
+    std::shared_ptr<Enemy> enemy;
 public:
-    attackNode(Enemy& enemy) : enemy(enemy) {}
+    attackNode(std::shared_ptr<Enemy> enemy) : enemy(enemy) {}
     void addGrid(Grid& _grid) override;
     NodeState Execute() override;
 };
 
 class fleeNode : public BTNode {
 private:
-    Enemy& enemy;
+    std::shared_ptr<Enemy> enemy;
 public:
-    fleeNode(Enemy& enemy) : enemy(enemy) {}
+    fleeNode(std::shared_ptr<Enemy> enemy) : enemy(enemy) {}
     void addGrid(Grid& _grid) override;
     NodeState Execute() override;
 };
 
 class patrolNode : public BTNode {
 private:
-    Enemy& enemy;
+    std::shared_ptr<Enemy> enemy;
 public:
-    patrolNode(Enemy& enemy) : enemy(enemy) {}
+    patrolNode(std::shared_ptr<Enemy> enemy) : enemy(enemy) {}
     void addGrid(Grid& _grid) override;
     NodeState Execute() override;
 };
@@ -113,7 +113,7 @@ public:
 // Méthode douteuse, c'est vrai... Mais bon au moins ça marche
 class InheritFromEveryone : public SelectorNode, public SequenceNode, public Blackboard {
 public:
-    static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, Enemy& enemy,
+    static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, std::shared_ptr<Entity>& enemy,
         bool& playerDetected, bool& playerInsight, bool& lowHP, Grid& grid);
 
     static void executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP);
