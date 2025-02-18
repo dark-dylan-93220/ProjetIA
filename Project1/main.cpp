@@ -51,12 +51,14 @@ int main() {
     }
 
     GOAPAgent agent;
+    std::vector<Goal> goals;
+    goals = { Goal::Patrouiller, Goal::Chasser, Goal::Chercher, Goal::Fuir };
 
     std::cout << "Etat initial de l'agent:\n";
     agent.PrintState();
 
     std::cout << "\nL'agent commence ses actions...\n";
-    agent.PerformActions();  // L'agent va chercher de la nourriture, puis manger
+    agent.PerformActions(goals);  // L'agent va chercher de la nourriture, puis manger
 
     std::cout << "\nEtat de l'agent après avoir effectue les actions:\n";
     agent.PrintState();
