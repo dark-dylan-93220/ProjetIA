@@ -58,6 +58,10 @@ void GOAPAgent::PerformActions(std::vector<Goal>& goals) {
 }
 
 void GOAPAgent::PrintState() {
-    std::cout << "Niveau d'endurance : " << state.GetEndurance() << "\n";
-    std::cout << "Est-il en train de chasser : " << (state.IsChasing() ? "Oui" : "Non") << "\n";
+    std::cout << "Niveau d'endurance................. : " << state.GetEndurance() << "\n";
+    std::cout << "Niveau d'HP........................ : " << state.GetHP() << "\n";
+    std::cout << "Durée de patrouille................ : " << state.GetPatrollingDuration() << "\n";
+    std::cout << "Est-il en train de patrouiller..... : " << (state.IsPatrolling() ? "Oui" : "Non") << "\n";
+    std::cout << "Est-il en train de chasser......... : " << (state.IsChasing() ? "Oui" : "Non") << "\n";
+    std::cout << "Est-il en train de chercher........ : " << (state.IsPatrolling() ? "Oui" : "Non") << "\n";
 }

@@ -20,6 +20,6 @@ void Entity::takeDamage(int damage) {
     health -= damage;
 }
 
-bool Entity::getStatutAtk() {
+bool Entity::getStatutAtk() const {
     return enemyAttackPlayer;
 }
