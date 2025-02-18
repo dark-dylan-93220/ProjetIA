@@ -64,7 +64,7 @@ void chaseNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
 NodeState chaseNode::Execute() {
-    enemy.chase(1, grid); //suivre
+    enemy->chase(1, grid); //suivre
     return NodeState::SUCCESS;
 }
 
@@ -72,7 +72,7 @@ void attackNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
 NodeState attackNode::Execute() {
-    enemy.attack(1, grid); //attaquer
+    enemy->attack(1, grid); //attaquer
     return NodeState::SUCCESS;
 }
 
@@ -80,7 +80,7 @@ void fleeNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
 NodeState fleeNode::Execute() {
-    enemy.flee(1, grid); //fuir
+    enemy->flee(1, grid); //fuir
     return NodeState::SUCCESS;
 }
 
@@ -88,13 +88,15 @@ void patrolNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
 NodeState patrolNode::Execute() {
-    enemy.patrol(1, grid); //fuir
+    enemy->patrol(1, grid); //fuir
     return NodeState::SUCCESS;
 }
 
-void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, Enemy& enemy,
+void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, std::shared_ptr<Entity> _enemy,
     bool& playerDetected, bool& playerInsight, bool& lowHP, Grid& grid)
 {
+    std::shared_ptr<Enemy> enemy = std::dynamic_pointer_cast<Enemy>(_enemy);
+
     // Inscription des "valeurs" sur le blackboard
     bb.SetValue("playerDetected", playerDetected);
     bb.SetValue("playerInsight", playerInsight);
@@ -135,6 +137,7 @@ void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, std::un
 
 void InheritFromEveryone::executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP)
 {
+    
     // Mise à jour des "valeurs" sur le blackboard
     bb.SetValue("playerDetected", playerDetected);
     bb.SetValue("playerInsight", playerInsight);

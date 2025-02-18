@@ -25,30 +25,33 @@ Enemy::Enemy(float x, float y, int hp) : Entity(x, y, sf::Color::Red, hp)
 
 void Enemy::update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) {
     if(isAlive()) 
-        moveTowardsPlayer(playerPos, grid, deltaTime);
+        moveTowardsPlayer(players[0]->shape.getPosition(), grid, deltaTime);
 }
 
-void Enemy::chase(float deltaTime, Grid& grid) {
+void Enemy::chase(float deltaTime, Grid& grid) { // --------------------------------------------------
     std::cout << "chase" << std::endl;
+    enemiAttackPlayer = false;
 }
 void Enemy::attack(float deltaTime, Grid& grid) {
     std::cout << "attack" << std::endl;
+    enemiAttackPlayer = true;
 }
 void Enemy::patrol(float deltaTime, Grid& grid) {
     std::cout << "patrol" << std::endl;
+    enemiAttackPlayer = false;
 }
 void Enemy::flee(float deltaTime, Grid& grid) {
     std::cout << "flee" << std::endl;
+    enemiAttackPlayer = false;
 }
 
-void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTime) {
+void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTime) {
     float distance = (float)std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
     playerDetected = false;
     playerInsight = false;
-    /*if (hp de lennemi < 20) {
+    if (health < 5) {
         lowHP = true;
-        return;
-    }*/
+    }
 
     if (distance < 1 || distance > 200) return;
     playerDetected = true;
@@ -100,10 +103,19 @@ void Enemy::moveTowardsPlayer(sf::Vector2f& playerPos, Grid& grid, float deltaTi
         float dy = position.y - shape.getPosition().y;
         float angle = std::atan2(dy, dx);
 
-        shape.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
+        if (lowHP)
+        {
+            shape.move(-SPEED * std::cos(angle) * deltaTime, -SPEED * std::sin(angle) * deltaTime);
+            circle.move(-SPEED * std::cos(angle) * deltaTime, -SPEED * std::sin(angle) * deltaTime);
+        }
+        else
+        {
+            shape.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
+            circle.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
+        }
 
         // 1 étape par seconde
-        if (second >= 1) {
+        if (second >= 0.3f) {
             step++;
             second = 0;
         }
