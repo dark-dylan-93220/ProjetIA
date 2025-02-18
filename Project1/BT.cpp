@@ -92,7 +92,7 @@ NodeState patrolNode::Execute() {
     return NodeState::SUCCESS;
 }
 
-void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, std::shared_ptr<Entity> _enemy,
+void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, std::shared_ptr<Entity>& _enemy,
     bool& playerDetected, bool& playerInsight, bool& lowHP, Grid& grid)
 {
     std::shared_ptr<Enemy> enemy = std::dynamic_pointer_cast<Enemy>(_enemy);

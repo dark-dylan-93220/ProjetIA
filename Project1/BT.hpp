@@ -113,7 +113,7 @@ public:
 // Méthode douteuse, c'est vrai... Mais bon au moins ça marche
 class InheritFromEveryone : public SelectorNode, public SequenceNode, public Blackboard {
 public:
-    static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, std::shared_ptr<Entity> enemy,
+    static void makeTree(std::unique_ptr<SelectorNode>& root, std::unique_ptr<SelectorNode>& root2, std::unique_ptr<SequenceNode>& sequence, std::unique_ptr<SequenceNode>& sequence2, std::unique_ptr<SequenceNode>& sequence3, std::unique_ptr<SequenceNode>& sequence4, Blackboard& bb, std::shared_ptr<Entity>& enemy,
         bool& playerDetected, bool& playerInsight, bool& lowHP, Grid& grid);
 
     static void executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP);

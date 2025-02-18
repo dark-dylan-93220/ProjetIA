@@ -46,7 +46,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
     float distance = (float)std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
     playerDetected = false;
     playerInsight = false;
-    enemiAttackPlayer = false;
+    enemyAttackPlayer = false;
     if (health < 5) {
         lowHP = true;
     }
@@ -58,7 +58,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
     if (distance < CELL_SIZE) {
         playerDetected = false;
         playerInsight = true; 
-        enemiAttackPlayer = true;
+        enemyAttackPlayer = true;
     }
 
     if (followPath.first.empty() || needsRepath) {

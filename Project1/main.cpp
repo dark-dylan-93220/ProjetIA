@@ -16,7 +16,7 @@ int main() {
     sf::Clock clock;
     sf::Event event;
 
-    int timer = 0;
+    float timer = 0;
 
     std::vector<std::shared_ptr<Entity>> players = { std::make_shared<Player>(400, 400, 50) };
     std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100, 100, 1), std::make_shared<Enemy>(700, 100, 100) };
@@ -53,12 +53,14 @@ int main() {
     }
 
     GOAPAgent agent;
+    std::vector<Goal> goals;
+    goals = { Goal::Patrouiller, Goal::Chasser, Goal::Chercher, Goal::Fuir };
 
     std::cout << "Etat initial de l'agent:\n";
     agent.PrintState();
 
     std::cout << "\nL'agent commence ses actions...\n";
-    agent.PerformActions();  // L'agent va chercher de la nourriture, puis manger
+    agent.PerformActions(goals);  // L'agent va chercher de la nourriture, puis manger
 
     std::cout << "\nEtat de l'agent après avoir effectue les actions:\n";
     agent.PrintState();
@@ -107,8 +109,8 @@ int main() {
                 if (players[0]->health <= 0) { players[0]->health = 0; }
             }
         }
-        timer++;
-        if (timer == 60) { timer = 0; }// l'enemi peut attaquer le joueur toutes les secondes
+        timer += deltaTime;
+        if (timer >= 1) { timer = 0; }// l'enemi peut attaquer le joueur toutes les secondes
         std::cout << "player health : " << players[0]->health << std::endl;
         std::cout << "-----------------------------------------" << std::endl;
         window.clear();

@@ -21,5 +21,5 @@ void Entity::takeDamage(int damage) {
 }
 
 bool Entity::getStatutAtk() {
-    return enemiAttackPlayer;
+    return enemyAttackPlayer;
 }
