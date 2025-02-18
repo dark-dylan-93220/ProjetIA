@@ -16,7 +16,9 @@ int main() {
     sf::Clock clock;
     sf::Event event;
 
-    std::vector<std::shared_ptr<Entity>> players = { std::make_shared<Player>(400, 400, 10) };
+    int timer = 0;
+
+    std::vector<std::shared_ptr<Entity>> players = { std::make_shared<Player>(400, 400, 50) };
     std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100, 100, 1), std::make_shared<Enemy>(700, 100, 100) };
     //std::vector<std::shared_ptr<Enemy>> trueEnemies = { std::dynamic_pointer_cast<Enemy>(enemies[0]), std::dynamic_pointer_cast<Enemy>(enemies[1]) };
     
@@ -99,12 +101,15 @@ int main() {
         //}
 
         players[0]->update(deltaTime, grid, enemies);
-        if (players[0]->enemiAttackPlayer)
-        {
-            players[0]->health -= 10;
+        for (int  i = 0; i < 2; i++) {
+            if (enemies[i]->getStatutAtk() && (timer == 0)) {
+                players[0]->health -= 10;
+                if (players[0]->health <= 0) { players[0]->health = 0; }
+            }
         }
+        timer++;
+        if (timer == 60) { timer = 0; }// l'enemi peut attaquer le joueur toutes les secondes
         std::cout << "player health : " << players[0]->health << std::endl;
-
         std::cout << "-----------------------------------------" << std::endl;
         window.clear();
 

@@ -27,4 +27,5 @@ public:
     void attack(float deltaTime, Grid& grid);
     void patrol(float deltaTime, Grid& grid);
     void flee(float deltaTime, Grid& grid);
+    
 };

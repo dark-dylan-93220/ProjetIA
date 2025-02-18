@@ -30,25 +30,23 @@ void Enemy::update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Enti
 
 void Enemy::chase(float deltaTime, Grid& grid) { // --------------------------------------------------
     std::cout << "chase" << std::endl;
-    enemiAttackPlayer = false;
 }
 void Enemy::attack(float deltaTime, Grid& grid) {
     std::cout << "attack" << std::endl;
-    enemiAttackPlayer = true;
 }
 void Enemy::patrol(float deltaTime, Grid& grid) {
     std::cout << "patrol" << std::endl;
-    enemiAttackPlayer = false;
 }
 void Enemy::flee(float deltaTime, Grid& grid) {
     std::cout << "flee" << std::endl;
-    enemiAttackPlayer = false;
 }
+
 
 void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTime) {
     float distance = (float)std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
     playerDetected = false;
     playerInsight = false;
+    enemiAttackPlayer = false;
     if (health < 5) {
         lowHP = true;
     }
@@ -60,6 +58,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
     if (distance < CELL_SIZE) {
         playerDetected = false;
         playerInsight = true; 
+        enemiAttackPlayer = true;
     }
 
     if (followPath.first.empty() || needsRepath) {
