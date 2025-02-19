@@ -19,34 +19,22 @@ int main() {
     float enemyAtkCD = 0;
     float deltaTime = 0;
 
-    std::vector<std::shared_ptr<Entity>> players = { std::make_shared<Player>(400, 400, 50) };
-    std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100, 100, 1), std::make_shared<Enemy>(700, 100, 100) };
+    std::shared_ptr<Entity> player = std::make_shared<Player>(400.f, 400.f, 50);
+    std::vector<std::shared_ptr<Entity>> players = { player };
+    std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100.f, 100.f, 1), std::make_shared<Enemy>(700.f, 100.f, 100) };
+    
+    auto root = std::make_unique<SelectorNode>();
 
     Grid grid;
     grid.loadFromFile("map.txt");
-
-    auto root1 = std::make_unique<SelectorNode>();
-    auto root2 = std::make_unique<SelectorNode>();
-    auto root3 = std::make_unique<SelectorNode>();
-    auto root4 = std::make_unique<SelectorNode>();
-
-    auto sequenceEnemyOne1 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyOne2 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyOne3 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyOne4 = std::make_unique<SequenceNode>();
-
-    auto sequenceEnemyTwo1 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyTwo2 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyTwo3 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyTwo4 = std::make_unique<SequenceNode>();
 
     Blackboard bb;
 
     for (int i = 0; i < 2; ++i) {
         if (i == 0)
-            InheritFromEveryone::makeTree(root1, root2, sequenceEnemyOne1, sequenceEnemyOne2, sequenceEnemyOne3, sequenceEnemyOne4, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
+            InheritFromEveryone::makeTree(root, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
         else
-            InheritFromEveryone::makeTree(root3, root4, sequenceEnemyTwo1, sequenceEnemyTwo2, sequenceEnemyTwo3, sequenceEnemyTwo4, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
+            InheritFromEveryone::makeTree(root, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
     }
 
     GOAPAgent agent;
@@ -74,30 +62,32 @@ int main() {
                 window.close();
         }
 
-        players[0]->update(deltaTime, grid, enemies);
+        player->update(deltaTime, grid, enemies);
 
         for (auto& enemy : enemies)
         {
             if (std::dynamic_pointer_cast<Enemy>(enemy) == enemy) 
             {
-                std::cout << "Etat ennemi a l'adresse " << enemy.get() << " : ";
                 if (enemy->isAlive())
                 {
-                    InheritFromEveryone::executeTree(root1, bb, std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected, std::dynamic_pointer_cast<Enemy>(enemy)->playerInsight, std::dynamic_pointer_cast<Enemy>(enemy)->lowHP);
+                    goals = { Goal::Patrouiller, Goal::Chasser, Goal::Chercher, Goal::Fuir };
+                    agent.PerformActions(goals);
+                    std::cout << "Etat ennemi a l'adresse " << enemy.get() << " : ";
+                    InheritFromEveryone::executeTree(root, bb, std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected, std::dynamic_pointer_cast<Enemy>(enemy)->playerInsight, std::dynamic_pointer_cast<Enemy>(enemy)->lowHP);
                     enemy->update(deltaTime, grid, players);
-                    if (enemy->getStatutAtk() && (enemyAtkCD == 0)) 
+                    if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive())
                     {
-                        players[0]->health -= 10;
-                        if (players[0]->health <= 0) 
+                        player->health -= 10;
+                        if (player->health <= 0) 
                         {
-                            players[0]->health = 0;
+                            player->health = 0;
                         }
                     }
                 }
             }
         }
 
-        std::cout << "Player's health : " << players[0]->health << std::endl;
+        std::cout << "Player's health : " << player->health << std::endl;
         std::cout << "-----------------------------------------" << std::endl;
 
         enemyAtkCD += deltaTime;

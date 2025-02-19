@@ -14,7 +14,12 @@ private:
     bool needsRepath;
     int step = 0;
     static constexpr float SPEED = 100.0f;
-
+    typedef std::pair<std::vector<sf::Vector2i>, std::vector<bool>> followPath_t;
+    followPath_t followPath;
+    std::vector<sf::Vector2i> followPathSteps;
+    sf::Vector2i start;
+    sf::Vector2i end;
+    sf::Vector2i fleeEnd;
     sf::Vector2i position;
     
 public:

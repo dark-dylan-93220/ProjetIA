@@ -8,13 +8,7 @@
 
 namespace {
     float second = 0;
-    typedef std::pair<std::vector<sf::Vector2i>, std::vector<bool>> followPath_t;
-    followPath_t followPath = { std::vector<sf::Vector2i>{}, std::vector<bool>{} };
-    sf::Vector2i start;
-    sf::Vector2i end;
-    sf::Vector2i fleeEnd;
     sf::Vector2i gridSize = { GRID_WIDTH - 1, GRID_HEIGHT - 1 };
-    std::vector<sf::Vector2i> followPathSteps;
 }
 
 sf::Vector2i findFarthestTile(const sf::Vector2i& origin, const sf::Vector2i& gridSize);
@@ -26,11 +20,11 @@ Enemy::Enemy(float x, float y, int hp) : Entity(x, y, sf::Color::Red, hp)
     playerDetected = false;
     playerInsight = false;
     position = sf::Vector2i{ static_cast<int>(x), static_cast<int>(y) };
+    followPath = { std::vector<sf::Vector2i>{}, std::vector<bool>{} };
 }
 
 void Enemy::update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) {
-    if(isAlive()) 
-        moveTowardsPlayer(players[0]->shape.getPosition(), grid, deltaTime);
+    moveTowardsPlayer(players[0]->shape.getPosition(), grid, deltaTime);
 }
 
 void Enemy::chase(float deltaTime, Grid& grid) { // --------------------------------------------------
@@ -55,6 +49,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
     if (health <= 10) {
         lowHP = true;
     }
+    std::cout << this << " Low HP : " << lowHP << std::endl;
 
     if (distance < 1 || distance > 200) return;
 
@@ -84,7 +79,7 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
         else
             followPathSteps = Pathfinding::findPath(grid, start, end);
 
-        // Le chemin est pris en compte seulement s'il contient plus de 2 étapes
+        // Le chemin est pris en compte seulement s'il contient au moins 2 étapes
         if (followPathSteps.size() <= 1) return;
 
         std::cout << "Chemin calcule : ";
