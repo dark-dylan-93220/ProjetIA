@@ -2,6 +2,8 @@
 
 #include "Entity.hpp"
 
+enum StateFSM { PATROL, CHASE, FLEE, ATTACK };
+
 class Enemy : public Entity {
 public:
     bool playerDetected; 
@@ -21,16 +23,25 @@ private:
     sf::Vector2i end;
     sf::Vector2i fleeEnd;
     sf::Vector2i position;
+    StateFSM currentState;
     
 public:
     Enemy(float x, float y, int hp);
 
 public:
+    // A* Pathinding
     void update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) override;
 	void moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTime);
+
+    // Behavior tree & GOAP states
     void chase(float deltaTime, Grid& grid);
     void attack(float deltaTime, Grid& grid);
     void patrol(float deltaTime, Grid& grid);
     void flee(float deltaTime, Grid& grid);
-    
+
+    // FSM
+    void FSMupdate(const bool& playerDetected, const bool& playerInsight, const bool& lowHP, const sf::Vector2f& playerPos);
+    void FSMpatrol();
+    void FSMchase(const sf::Vector2f& playerPos);
+    void FSMFlee(const sf::Vector2f& playerPos);
 };

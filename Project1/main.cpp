@@ -74,6 +74,7 @@ int main() {
                     agent.PerformActions(goals);
                     std::cout << "Etat ennemi a l'adresse " << enemy.get() << " : ";
                     InheritFromEveryone::executeTree(root, bb, std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected, std::dynamic_pointer_cast<Enemy>(enemy)->playerInsight, std::dynamic_pointer_cast<Enemy>(enemy)->lowHP);
+                    std::cout << std::endl;
                     enemy->update(deltaTime, grid, players);
                     if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive())
                     {
@@ -86,10 +87,6 @@ int main() {
                 }
             }
         }
-
-        std::cout << "Player's health : " << player->health << std::endl;
-        std::cout << "-----------------------------------------" << std::endl;
-
         enemyAtkCD += deltaTime;
         if (enemyAtkCD >= 1) {
             enemyAtkCD = 0;

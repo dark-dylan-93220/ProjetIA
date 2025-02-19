@@ -12,7 +12,7 @@ Node::Node(sf::Vector2i pos)
 
 void Node::calculateCosts(sf::Vector2i endPos, float newG) {
     gCost = newG;
-    hCost = calculateHeuristic(endPos);
+    hCost = (float)calculateHeuristic(endPos);
     fCost = gCost + hCost;
 }
 

@@ -133,6 +133,109 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
     second += deltaTime;
 }
 
+void Enemy::FSMupdate(const bool& playerDetected, const bool& playerInsight, const bool& lowHP,  const sf::Vector2f& playerPos) {
+
+    switch (currentState) {
+    case PATROL:
+        FSMpatrol();
+
+        std::cout << "patrolFSM" << std::endl;
+        enemyAttackPlayer = false;
+
+        if (lowHP) { 
+            currentState = FLEE; 
+        }
+        if (playerDetected) {
+            currentState = CHASE;
+        }
+        break;
+
+    case CHASE:
+        FSMchase(playerPos);
+
+        std::cout << "chaseFSM" << std::endl;
+        enemyAttackPlayer = false;
+
+        if (lowHP) { 
+            currentState = FLEE; 
+        }
+
+        if (!playerDetected) {
+            if (playerInsight) { 
+                currentState = ATTACK; 
+            }
+            else { 
+                currentState = PATROL; 
+            }
+        }
+        break;
+
+    case ATTACK:
+        enemyAttackPlayer = true;
+        std::cout << "attackFSM" << std::endl;
+
+        if (lowHP) { 
+            currentState = FLEE; 
+        }
+        break;
+
+    case FLEE:
+        enemyAttackPlayer = false;
+        std::cout << "fleeFSM" << std::endl;
+        break;
+    }
+}
+
+void Enemy::FSMpatrol() {
+    static int currentWaypoint = 0;
+    static sf::Vector2f waypoints[4] = { sf::Vector2f(100, 100), sf::Vector2f(100, 400), sf::Vector2f(400, 400), sf::Vector2f(400, 100) };
+
+    sf::Vector2f target = waypoints[currentWaypoint];
+    sf::Vector2f direction = target - shape.getPosition();
+    sf::Vector2f newPos = shape.getPosition();
+
+    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+    if (distance < 5.0f) {
+        currentWaypoint = (currentWaypoint + 1) % 4;
+    }
+    else {
+        direction /= distance;
+        newPos += direction * 0.2f;
+    }
+
+    shape.setPosition(newPos);
+    circle.setPosition(newPos);
+}
+
+void Enemy::FSMchase(const sf::Vector2f& playerPos) {
+    sf::Vector2f direction = playerPos - shape.getPosition();
+    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    sf::Vector2f newPos = shape.getPosition();
+
+    if (distance > 0) {
+        direction /= distance;
+        newPos += direction * 0.2f;
+    }
+
+    shape.setPosition(newPos);
+    circle.setPosition(newPos);
+}
+
+void Enemy::FSMFlee(const sf::Vector2f& playerPos) {
+    sf::Vector2f direction = playerPos - shape.getPosition();
+    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    sf::Vector2f newPos = shape.getPosition();
+
+    if (distance > 0) {
+        direction /= distance;
+        newPos += direction * 0.2f;
+    }
+
+    shape.setPosition(newPos);
+    circle.setPosition(newPos);
+}
+
 sf::Vector2i findFarthestTile(const sf::Vector2i& origin, const sf::Vector2i& gridSize) {
     // Liste des coins de la grille
     sf::Vector2i corners[4] = {
@@ -147,7 +250,7 @@ sf::Vector2i findFarthestTile(const sf::Vector2i& origin, const sf::Vector2i& gr
     int maxDistance = 0;
 
     for (const auto& corner : corners) {
-        int distance = std::abs(corner.x - origin.x) + std::abs(corner.y - origin.y); // Distance de Manhattan
+        int distance = std::abs(corner.x - origin.x) + std::abs(corner.y - origin.y);
 
         if (distance > maxDistance) {
             maxDistance = distance;

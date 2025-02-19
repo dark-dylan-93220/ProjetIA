@@ -1,5 +1,7 @@
 #include "GOAP.hpp"
 
+#include <algorithm>
+
 GOAPAgent::GOAPAgent() {
     state.SetEndurance(100);
     state.setHP(100);
@@ -39,6 +41,9 @@ std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState
         }
 
     }
+
+    // Pour éxecuter les actions les moins couteuses en premier
+    std::sort(plan.begin(), plan.end());
 
     return plan;
 }
