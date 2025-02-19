@@ -17,7 +17,7 @@ public:
 public:
     bool isAlive() const;
     void takeDamage(int damage);
-    bool getStatutAtk();
+    bool getStatutAtk() const;
 };
 
 #endif // ENTITY_HPP

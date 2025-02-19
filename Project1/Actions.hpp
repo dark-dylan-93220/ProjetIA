@@ -7,11 +7,12 @@ public:
     virtual bool CanExecute(const State& state) = 0;
     virtual void Execute(State& state) = 0;
     virtual void changeCost(int newCost) = 0;
+    virtual int  GetCost() = 0;
     virtual ~Action() {}
 };
 
 class PatrollingAction : public Action {
-public:
+private:
     int cost;
 
 public:
@@ -19,10 +20,11 @@ public:
     bool CanExecute(const State& state) override;
     void Execute(State& state) override;
     void changeCost(int newCost) override;
+    int GetCost() override;
 };
 
 class ChaseAction : public Action {
-public:
+private:
     int cost;
 
 public:
@@ -30,10 +32,11 @@ public:
     bool CanExecute(const State& state) override;
     void Execute(State& state) override;
     void changeCost(int newCost) override;
+    int GetCost() override;
 };
 
 class SearchPlayerAction : public Action {
-public:
+private:
     int cost;
 
 public:
@@ -41,10 +44,11 @@ public:
     bool CanExecute(const State& state) override;
     void Execute(State& state) override;
     void changeCost(int newCost) override;
+    int GetCost() override;
 };
 
 class FleeAction : public Action {
-public:
+private:
     int cost;
 
 public:
@@ -52,4 +56,5 @@ public:
     bool CanExecute(const State& state) override;
     void Execute(State& state) override;
     void changeCost(int newCost) override;
+    int GetCost() override;
 };

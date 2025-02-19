@@ -18,6 +18,9 @@ void PatrollingAction::Execute(State& state) {
 void PatrollingAction::changeCost(int newCost) {
     cost = newCost;
 }
+int PatrollingAction::GetCost() {
+    return cost;
+}
 
 // --- CHASE ACTION --- //
 ChaseAction::ChaseAction(int _cost) {
@@ -32,6 +35,9 @@ void ChaseAction::Execute(State& state) {
 }
 void ChaseAction::changeCost(int newCost) {
     cost = newCost;
+}
+int ChaseAction::GetCost() {
+    return cost;
 }
 
 // --- SEARCH PLAYER ACTION --- //
@@ -49,6 +55,9 @@ void SearchPlayerAction::Execute(State& state) {
 void SearchPlayerAction::changeCost(int newCost) {
     cost = newCost;
 }
+int SearchPlayerAction::GetCost() {
+    return cost;
+}
 
 // FLEE ACTION
 FleeAction::FleeAction(int _cost) {
@@ -65,4 +74,7 @@ void FleeAction::Execute(State& state) {
 }
 void FleeAction::changeCost(int newCost) {
     cost = newCost;
+}
+int FleeAction::GetCost() {
+    return cost;
 }

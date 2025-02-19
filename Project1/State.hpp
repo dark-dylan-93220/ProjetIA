@@ -16,12 +16,16 @@ public:
     State();
 
     // Getters
-    bool IsChasing() const;
-    bool IsPatrolling() const;
-    bool IsSearching() const;
-    int GetEndurance() const;
+        // HP
     int GetHP() const;
+        // Patrolling
+    bool IsPatrolling() const;
     float GetPatrollingDuration() const;
+        // Searching
+    bool IsSearching() const;
+        // Chasing
+    bool IsChasing() const;
+    int GetEndurance() const;
 
     // Setters
         // HP
