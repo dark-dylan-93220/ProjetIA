@@ -5,10 +5,14 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <thread>
+#include <functional>
+#include <future>
 
 namespace {
     float second = 0;
     sf::Vector2i gridSize = { GRID_WIDTH - 1, GRID_HEIGHT - 1 };
+    std::thread t;
 }
 
 sf::Vector2i findFarthestTile(const sf::Vector2i& origin, const sf::Vector2i& gridSize);
@@ -82,11 +86,17 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, const float& d
         };
         fleeEnd = findFarthestTile(start, gridSize);
 
+        std::thread pathfindingThread;
+        
+
         if (lowHP) {
-            followPathSteps = Pathfinding::findPath(grid, start, fleeEnd);
+            std::future<std::vector<sf::Vector2i>> result = std::async(std::launch::async, Pathfinding::findPath, std::ref(grid), std::ref(start), std::ref(fleeEnd));
+            followPathSteps = result.get();
         }
-        else
-            followPathSteps = Pathfinding::findPath(grid, start, end);
+        else {
+            std::future<std::vector<sf::Vector2i>> result = std::async(std::launch::async, Pathfinding::findPath, std::ref(grid), std::ref(start), std::ref(end));
+            followPathSteps = result.get();
+        }
 
         // Le chemin est pris en compte seulement s'il contient au moins 2 étapes
         if (followPathSteps.size() <= 1) return;

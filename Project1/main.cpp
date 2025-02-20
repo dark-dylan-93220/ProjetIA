@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <thread>
 
 #include "Player.hpp"
 #include "Enemy.hpp"
@@ -123,5 +124,6 @@ int main() {
         window.display();
 
     }
+
     return 0;
 }
