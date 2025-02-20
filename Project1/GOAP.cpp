@@ -1,33 +1,60 @@
 #include "GOAP.hpp"
 
+#include <algorithm>
+
 GOAPAgent::GOAPAgent() {
-    state.SetHunger(100);  // Initialement, l'agent a faim
+    state.SetEndurance(100);
+    state.setHP(100);
+    state.setPatrolling(true);
 }
 
-std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState, Goal& goal) {
+std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState, std::vector<Goal>& goals) {
     std::vector<std::unique_ptr<Action>> plan;
 
-    if (goal == Goal::Manger) {
-        if (initialState.GetHunger() > 0 && !initialState.HasFood()) {
-            plan.push_back(std::move(std::make_unique<SearchFoodAction>()));
-            plan.push_back(std::move(std::make_unique<EatAction>()));
+    for (auto& goal : goals) {
+
+        switch (goal) {
+        case Goal::Patrouiller:
+            if (!initialState.IsChasing())
+                plan.push_back(std::make_unique<PatrollingAction>(5));
+            break;
+        case Goal::Chasser:
+            if (initialState.GetEndurance() > 50)
+                plan.push_back(std::make_unique<ChaseAction>(15));
+            else
+                plan.push_back(std::make_unique<ChaseAction>(15 + initialState.GetEndurance()));
+            break;
+        case Goal::Chercher:
+            if (!initialState.IsChasing() && !initialState.IsPatrolling())
+                plan.push_back(std::make_unique<SearchPlayerAction>(7));
+            else
+                plan.push_back(std::make_unique<PatrollingAction>(5));
+            break;
+        case Goal::Fuir: // Priorité
+            if (initialState.GetHP() > 10)
+                plan.push_back(std::make_unique<FleeAction>(10));
+            else  // Cout nul quand vie est faible
+                plan.push_back(std::make_unique<FleeAction>(0));
+            break;
+        default:
+            break;
         }
-        else if (initialState.HasFood()) {
-            plan.push_back(std::move(std::make_unique<EatAction>()));
-        }
+
     }
+
+    // Pour éxecuter les actions les moins couteuses en premier
+    std::sort(plan.begin(), plan.end());
 
     return plan;
 }
 
-void GOAPAgent::PerformActions() {
-    Goal goal = Goal::Manger;  // L'objectif de l'agent est de manger
+void GOAPAgent::PerformActions(std::vector<Goal>& goals) {
 
-    std::vector<std::unique_ptr<Action>> plan = planner.Plan(state, goal);
+    std::vector<std::unique_ptr<Action>> plan = planner.Plan(state, goals);
 
     for (auto& action : plan) {
         if (action->CanExecute(state)) {
-            action->Execute(state);  // Exécute l'action
+            action->Execute(state);
         }
         else {
             std::cout << "Action impossible : " << typeid(*action).name() << "\n";
@@ -36,6 +63,10 @@ void GOAPAgent::PerformActions() {
 }
 
 void GOAPAgent::PrintState() {
-    std::cout << "Niveau de faim : " << state.GetHunger() << "\n";
-    std::cout << "Nourriture disponible : " << (state.HasFood() ? "Oui" : "Non") << "\n";
+    std::cout << "Niveau d'endurance................. : " << state.GetEndurance() << "\n";
+    std::cout << "Niveau d'HP........................ : " << state.GetHP() << "\n";
+    std::cout << "Durée de patrouille................ : " << state.GetPatrollingDuration() << "\n";
+    std::cout << "Est-il en train de patrouiller..... : " << (state.IsPatrolling() ? "Oui" : "Non") << "\n";
+    std::cout << "Est-il en train de chasser......... : " << (state.IsChasing() ? "Oui" : "Non") << "\n";
+    std::cout << "Est-il en train de chercher........ : " << (state.IsPatrolling() ? "Oui" : "Non") << "\n";
 }

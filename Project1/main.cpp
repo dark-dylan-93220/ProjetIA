@@ -12,93 +12,90 @@ const int WINDOW_HEIGHT = 600;
 int main() {
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Jeu SFML - IA Ennemis");
     window.setFramerateLimit(60);
-    
+
     sf::Clock clock;
     sf::Event event;
 
-    Player player(400, 400, 10);
-    std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100, 100, 10), std::make_shared<Enemy>(700, 100, 100) };
-    std::vector<std::shared_ptr<Enemy>> trueEnemies = { std::dynamic_pointer_cast<Enemy>(enemies[0]), std::dynamic_pointer_cast<Enemy>(enemies[1]) };
+    float enemyAtkCD = 0;
+    float deltaTime = 0;
+
+    std::shared_ptr<Entity> player = std::make_shared<Player>(400.f, 400.f, 50);
+    std::vector<std::shared_ptr<Entity>> players = { player };
+    std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100.f, 100.f, 1), std::make_shared<Enemy>(700.f, 100.f, 100) };
     
-    bool playerDetected = false;
-    bool playerInsight = false;
-    bool lowHP = false;
-    
+    auto root = std::make_unique<SelectorNode>();
+
     Grid grid;
     grid.loadFromFile("map.txt");
 
-    auto root1 = std::make_unique<SelectorNode>();
-    auto root2 = std::make_unique<SelectorNode>();
-    auto root3 = std::make_unique<SelectorNode>();
-    auto root4 = std::make_unique<SelectorNode>();
-
-    auto sequenceEnemyOne1 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyOne2 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyOne3 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyOne4 = std::make_unique<SequenceNode>();
-
-    auto sequenceEnemyTwo1 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyTwo2 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyTwo3 = std::make_unique<SequenceNode>();
-    auto sequenceEnemyTwo4 = std::make_unique<SequenceNode>();
     Blackboard bb;
 
 
     for (int i = 0; i < 2; ++i) {
         if (i == 0)
-            InheritFromEveryone::makeTree(root1, root2, sequenceEnemyOne1, sequenceEnemyOne2, sequenceEnemyOne3, sequenceEnemyOne4, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP, grid);
+            InheritFromEveryone::makeTree(root, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
         else
-            InheritFromEveryone::makeTree(root3, root4, sequenceEnemyTwo1, sequenceEnemyTwo2, sequenceEnemyTwo3, sequenceEnemyTwo4, bb, *trueEnemies[i], playerDetected, playerInsight, lowHP, grid);
+            InheritFromEveryone::makeTree(root, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
     }
 
     GOAPAgent agent;
+    std::vector<Goal> goals;
+    goals = { Goal::Patrouiller, Goal::Chasser, Goal::Chercher, Goal::Fuir };
 
     std::cout << "Etat initial de l'agent:\n";
+    std::cout << "-----------------------------------------" << std::endl;
     agent.PrintState();
 
     std::cout << "\nL'agent commence ses actions...\n";
-    agent.PerformActions();  // L'agent va chercher de la nourriture, puis manger
+    agent.PerformActions(goals);
 
-    std::cout << "\nEtat de l'agent après avoir effectue les actions:\n";
+    std::cout << "\nEtat de l'agent apres avoir effectue les actions:\n";
+    std::cout << "-----------------------------------------" << std::endl;
     agent.PrintState();
-    
-    //BTNode->this(grid); ----------------------------------------------------------------------------------
-    
-    while (window.isOpen()) {
-        float deltaTime = clock.restart().asSeconds();
-        
-        while (window.pollEvent(event)) 
+
+    while (window.isOpen()) 
+    {
+        deltaTime = clock.restart().asSeconds();
+
+        while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-    
-        for (auto& enemy : enemies) 
+
+        player->update(deltaTime, grid, enemies);
+
+        for (auto& enemy : enemies)
         {
-            // Mise à jour du behavior tree et exécution de ce dernier
-            InheritFromEveryone::executeTree(root1, bb, playerDetected, playerInsight, lowHP);
-            // Mise à jour de la position du joueur pour les ennemis
-            enemy->update(deltaTime, grid, enemies);
-            
+            if (std::dynamic_pointer_cast<Enemy>(enemy) == enemy) 
+            {
+                if (enemy->isAlive())
+                {
+                    goals = { Goal::Patrouiller, Goal::Chasser, Goal::Chercher, Goal::Fuir };
+                    agent.PerformActions(goals);
+                    std::cout << "Etat ennemi a l'adresse " << enemy.get() << " : ";
+                    InheritFromEveryone::executeTree(root, bb, std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected, std::dynamic_pointer_cast<Enemy>(enemy)->playerInsight, std::dynamic_pointer_cast<Enemy>(enemy)->lowHP);
+                    std::cout << std::endl;
+                    enemy->update(deltaTime, grid, players);
+                    if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive())
+                    {
+                        player->health -= 10;
+                        if (player->health <= 0) 
+                        {
+                            player->health = 0;
+                        }
+                    }
+                }
+            }
+        }
+        enemyAtkCD += deltaTime;
+        if (enemyAtkCD >= 1) {
+            enemyAtkCD = 0;
         }
 
-        for (auto& enemy : trueEnemies) {
-            enemy->playerPos = player.shape.getPosition();
-            // Mise à jour des valeurs booléennes des ennemis
-            if (enemy->playerDetected) playerDetected = true;
-            else                      playerDetected = false;
-            if (enemy->playerInsight)  playerInsight = true;
-            else                      playerInsight = false;
-            if (enemy->lowHP)          lowHP = true;
-            else                      lowHP = false;
-        }
-
-        player.update(deltaTime, grid, enemies);
-    
         window.clear();
-
         grid.draw(window);
-        window.draw(player.shape);
+        window.draw(players[0]->shape);
         for (const auto& enemy : enemies) {
             if (enemy->isAlive()) {
                 window.draw(enemy->shape);
@@ -106,7 +103,7 @@ int main() {
             }
         }
         window.display();
+
     }
-    
     return 0;
 }

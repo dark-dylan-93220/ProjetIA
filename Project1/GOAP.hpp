@@ -4,13 +4,15 @@
 #include "State.hpp"
 
 enum class Goal {
-    Manger,
-    ChercherNourriture
+    Patrouiller,
+    Chasser,
+    Chercher,
+    Fuir
 };
 
 class GOAPPlanner {
 public:
-    std::vector<std::unique_ptr<Action>> Plan(const State& initialState, Goal& goal);
+    std::vector<std::unique_ptr<Action>> Plan(const State& initialState, std::vector<Goal>& goal);
 };
 
 class GOAPAgent {
@@ -22,6 +24,6 @@ public:
     GOAPAgent();
 
 public:
-    void PerformActions();
+    void PerformActions(std::vector<Goal>& goals);
     void PrintState();
 };

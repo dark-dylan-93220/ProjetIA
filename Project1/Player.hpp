@@ -8,6 +8,7 @@ public:
     static constexpr int DAMAGE = 20;
     static constexpr float ATTACK_COOLDOWN = 0.5f;
     float attackTimer;
+    int hp;
 
     Player(float x, float y, int hp);
     void attack(std::vector<std::shared_ptr<Entity>> enemies);

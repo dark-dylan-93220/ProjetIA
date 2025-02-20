@@ -25,7 +25,7 @@ std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, 
 
     Node* startNode = new Node(start);
     startNode->gCost = 0;
-    startNode->hCost = startNode->calculateHeuristic(end);
+    startNode->hCost = (float)startNode->calculateHeuristic(end);
     startNode->fCost = startNode->gCost + startNode->hCost;
 
     openQueue.push(startNode);
@@ -52,11 +52,11 @@ std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, 
 
             if (neighborPos.x < 0 || neighborPos.x >= GRID_WIDTH || neighborPos.y < 0 || neighborPos.y >= GRID_HEIGHT)
                 continue;
-            if (!grid.getCell(neighborPos.x, neighborPos.x).walkable)
+            if (!grid.getCell(neighborPos.x, neighborPos.y).walkable)
                 continue;
 
             if ((dir.x != 0 && dir.y != 0) &&
-                (!grid.getCell(current->position.y, neighborPos.x).walkable || !grid.getCell(neighborPos.y, current->position.x).walkable))
+                (!grid.getCell(current->position.x, neighborPos.y).walkable || !grid.getCell(neighborPos.x, current->position.y).walkable))
                 continue;
 
             float newGCost = current->gCost + ((dir.x != 0 && dir.y != 0) ? 14.12f : 10.f); // 10 for straight, 14 for diagonal
@@ -74,7 +74,7 @@ std::vector<sf::Vector2i> Pathfinding::findPath(Grid& grid, sf::Vector2i start, 
             else {
                 neighbor = new Node(neighborPos);
                 neighbor->gCost = newGCost;
-                neighbor->hCost = neighbor->calculateHeuristic(end);
+                neighbor->hCost = (float)neighbor->calculateHeuristic(end);
                 neighbor->fCost = neighbor->gCost + neighbor->hCost;
                 neighbor->parent = current;
                 openQueue.push(neighbor);
