@@ -64,7 +64,8 @@ int main() {
     agent.PrintState();
 
     std::cout << "\nL'agent commence ses actions...\n";
-    agent.PerformActions(goals);
+    try { agent.PerformActions(goals); }
+    catch (const std::exception& e) { std::cerr << "Exception attrapée : " << e.what() << std::endl; }
 
     std::cout << "\nEtat de l'agent apres avoir effectue les actions:\n";
     std::cout << "-----------------------------------------" << std::endl;
