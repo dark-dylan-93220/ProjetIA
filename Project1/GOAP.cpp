@@ -50,9 +50,6 @@ std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState
 
 void GOAPAgent::PerformActions(std::vector<Goal>& goals) {
     std::vector<std::unique_ptr<Action>> plan = planner.Plan(state, goals);
-    if (0 == 0) {
-        throw std::runtime_error("Erreur : Vecteur Plan vide !");
-    }
 
     if (plan.size() == 0) {
         throw std::runtime_error("Erreur : Vecteur Plan vide !");
