@@ -6,7 +6,14 @@
 
 Player::Player(float x, float y, int hp) : Entity(x, y, sf::Color::Blue, hp), attackTimer(0.f) {}
 
-void Player::update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> enemies) {
+void Player::update(const float& deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> entities) {
+
+    std::vector<std::shared_ptr<Enemy>> enemies =
+    {
+        std::dynamic_pointer_cast<Enemy>(entities[0]),
+        std::dynamic_pointer_cast<Enemy>(entities[1])
+    };
+
     sf::Vector2f movement(0.f, 0.f);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) movement.y -= SPEED * deltaTime;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movement.y += SPEED * deltaTime;
@@ -37,13 +44,11 @@ void Player::update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Ent
     }
 }
 
-void Player::attack(std::vector<std::shared_ptr<Entity>> enemies) {
+void Player::attack(std::vector<std::shared_ptr<Enemy>> enemies) {
     for (auto& enemy : enemies) {
-        if (enemy == std::dynamic_pointer_cast<Enemy>(enemy)) {
-            if (enemy->isAlive() && shape.getGlobalBounds().intersects(enemy->shape.getGlobalBounds())) {
-                enemy->takeDamage(DAMAGE);
-                std::cout << "Enemy HP: " << enemy->health << std::endl;
-            }
+        if (enemy->isAlive() && shape.getGlobalBounds().intersects(enemy->shape.getGlobalBounds())) {
+            enemy->takeDamage(DAMAGE);
+            std::cout << "Enemy HP: " << enemy->health << std::endl;
         }
     }
     std::cout << "Player attacks" << std::endl;
