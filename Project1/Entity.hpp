@@ -10,7 +10,6 @@ public:
     sf::RectangleShape shape;
     sf::CircleShape circle;
     sf::Vector2f velocity;
-    sf::CircleShape circle;
     int health;
     bool enemyAttackPlayer = false;
     virtual void update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> neededEntities) = 0;

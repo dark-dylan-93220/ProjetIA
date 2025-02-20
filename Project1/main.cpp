@@ -26,6 +26,7 @@ int main() {
     auto root = std::make_unique<SelectorNode>();
 
     Grid grid;
+
     grid.loadFromFile("map.txt");
 
     Blackboard bb;
@@ -47,7 +48,8 @@ int main() {
     agent.PrintState();
 
     std::cout << "\nL'agent commence ses actions...\n";
-    agent.PerformActions(goals);
+    try { agent.PerformActions(goals); }
+    catch (const std::exception& e) { std::cerr << "Exception attrapée : " << e.what() << std::endl; }
 
     std::cout << "\nEtat de l'agent apres avoir effectue les actions:\n";
     std::cout << "-----------------------------------------" << std::endl;
@@ -77,11 +79,9 @@ int main() {
                     InheritFromEveryone::executeTree(root, bb, std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected, std::dynamic_pointer_cast<Enemy>(enemy)->playerInsight, std::dynamic_pointer_cast<Enemy>(enemy)->lowHP);
                     std::cout << std::endl;
                     enemy->update(deltaTime, grid, players);
-                    if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive())
-                    {
+                    if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive()) {
                         player->health -= 10;
-                        if (player->health <= 0) 
-                        {
+                        if (player->health <= 0) {
                             player->health = 0;
                         }
                     }

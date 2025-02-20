@@ -52,13 +52,6 @@ void ConditionNode::addGrid(Grid& _grid) {
 NodeState CheckEnemyProximityNode::Execute() {
     return (blackboard.GetValue(key) == expectedValue) ? NodeState::SUCCESS : NodeState::FAILURE;
 }
-
-//----------------------------PrintMessageNode---------------------------
-NodeState PrintMessageNode::Execute() {
-    std::cout << message << std::endl;
-    return NodeState::SUCCESS;
-}
-
 //----------------------------ActionNode---------------------------------
 void chaseNode::addGrid(Grid& _grid) {
     grid = _grid;

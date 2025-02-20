@@ -102,14 +102,6 @@ public:
     NodeState Execute() override;
 };
 
-class PrintMessageNode : public BTNode {
-private:
-    std::string message;
-public:
-    PrintMessageNode(const std::string& msg) : message(msg) {}
-    NodeState Execute() override;
-};
-
 // Méthode douteuse, c'est vrai... Mais bon au moins ça marche
 class InheritFromEveryone : public SelectorNode, public SequenceNode, public Blackboard {
 public:
