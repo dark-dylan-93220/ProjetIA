@@ -49,7 +49,6 @@ std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState
 }
 
 void GOAPAgent::PerformActions(std::vector<Goal>& goals) {
-
     std::vector<std::unique_ptr<Action>> plan = planner.Plan(state, goals);
 
     if (plan.size() == 0) {

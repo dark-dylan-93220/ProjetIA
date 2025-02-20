@@ -8,8 +8,8 @@ class Entity {
 public:
     Entity(float x, float y, sf::Color color, int hp);
     sf::RectangleShape shape;
-    sf::Vector2f velocity;
     sf::CircleShape circle;
+    sf::Vector2f velocity;
     int health;
     bool enemyAttackPlayer = false;
     virtual void update(const float& deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> neededEntities) = 0;
