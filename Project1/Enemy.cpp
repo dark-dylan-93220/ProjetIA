@@ -13,34 +13,39 @@ namespace {
 
 sf::Vector2i findFarthestTile(const sf::Vector2i& origin, const sf::Vector2i& gridSize);
 
-Enemy::Enemy(float x, float y, int hp) : Entity(x, y, sf::Color::Red, hp)
+Enemy::Enemy(float x, float y, int hp, const std::vector<sf::Vector2f>& waypoints) : Entity(x, y, sf::Color::Red, hp)
 {
+    _waypoints = waypoints;
     needsRepath = false;
     lowHP = false;
+    if (hp <= 10)
+        lowHP = true;
     playerDetected = false;
     playerInsight = false;
     position = sf::Vector2i{ static_cast<int>(x), static_cast<int>(y) };
     followPath = { std::vector<sf::Vector2i>{}, std::vector<bool>{} };
+    currentState = PATROL;
 }
 
-void Enemy::update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) {
+void Enemy::update(const float& deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> players) {
     moveTowardsPlayer(players[0]->shape.getPosition(), grid, deltaTime);
 }
 
-void Enemy::chase(float deltaTime, Grid& grid) { // --------------------------------------------------
-    std::cout << "En chasse" << std::endl;
+void Enemy::chase(const float& deltaTime, Grid& grid) { // --------------------------------------------------
+    std::cout << this << " : En chasse" << std::endl;
 }
-void Enemy::attack(float deltaTime, Grid& grid) {
-    std::cout << "En attaque" << std::endl;
+void Enemy::attack(const float& deltaTime, Grid& grid) {
+    std::cout << this << " : En attaque" << std::endl;
 }
-void Enemy::patrol(float deltaTime, Grid& grid) {
-    std::cout << "En patrouille" << std::endl;
+void Enemy::patrol(const float& deltaTime, Grid& grid) {
+    std::cout << this << " : En patrouille" << std::endl;
+    FSMpatrol(deltaTime, *this);
 }
-void Enemy::flee(float deltaTime, Grid& grid) {
-    std::cout << "En fuite" << std::endl;
+void Enemy::flee(const float& deltaTime, Grid& grid) {
+    std::cout << this << " : En fuite" << std::endl;
 }
 
-void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTime) {
+void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, const float& deltaTime) {
     float distance = (float)std::sqrt(std::pow(playerPos.x - shape.getPosition().x, 2) + std::pow(playerPos.y - shape.getPosition().y, 2));
     playerDetected = false;
     playerInsight = false;
@@ -48,8 +53,12 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
 
     if (health <= 10) {
         lowHP = true;
+        shape.setFillColor(sf::Color::Green);
     }
-    std::cout << this << " Low HP : " << lowHP << std::endl;
+    else {
+        shape.setFillColor(sf::Color::Red);
+    }
+    //std::cout << this << " Low HP : " << lowHP << std::endl;
 
     if (distance < 1 || distance > 200) return;
 
@@ -112,15 +121,22 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
             }
         }
 
-        float dx = position.x - shape.getPosition().x;
-        float dy = position.y - shape.getPosition().y;
-        float angle = std::atan2(dy, dx);
+        sf::Vector2f direction = sf::Vector2f{ (float)position.x, (float)position.y } - shape.getPosition();
 
-        shape.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
-        circle.move(SPEED * std::cos(angle) * deltaTime, SPEED * std::sin(angle) * deltaTime);
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (distance < 5.0f) {
+            step++;
+        }
+        else {
+            direction /= distance;
+        }
+
+        shape.move(direction * SPEED * deltaTime);
+        circle.move(direction * SPEED * deltaTime);
 
         // 3 étapes par seconde minimum.
-        if (second >= 0.8f) {
+        if (second >= 0.6f) {
             step++;
             second = 0;
         }
@@ -133,11 +149,11 @@ void Enemy::moveTowardsPlayer(sf::Vector2f playerPos, Grid& grid, float deltaTim
     second += deltaTime;
 }
 
-void Enemy::FSMupdate(const bool& playerDetected, const bool& playerInsight, const bool& lowHP,  const sf::Vector2f& playerPos) {
+void Enemy::FSMupdate(const float& deltaTime, const bool& playerDetected, const bool& playerInsight, const bool& lowHP,  const sf::Vector2f& playerPos) {
 
     switch (currentState) {
     case PATROL:
-        FSMpatrol();
+        FSMpatrol(deltaTime, *this);
 
         std::cout << "patrolFSM" << std::endl;
         enemyAttackPlayer = false;
@@ -145,13 +161,13 @@ void Enemy::FSMupdate(const bool& playerDetected, const bool& playerInsight, con
         if (lowHP) { 
             currentState = FLEE; 
         }
-        if (playerDetected) {
+        if (playerDetected && !lowHP) {
             currentState = CHASE;
         }
         break;
 
     case CHASE:
-        FSMchase(playerPos);
+        FSMchase(deltaTime, playerPos);
 
         std::cout << "chaseFSM" << std::endl;
         enemyAttackPlayer = false;
@@ -186,13 +202,11 @@ void Enemy::FSMupdate(const bool& playerDetected, const bool& playerInsight, con
     }
 }
 
-void Enemy::FSMpatrol() {
+void Enemy::FSMpatrol(const float& deltaTime, Enemy& enemy) {
     static int currentWaypoint = 0;
-    static sf::Vector2f waypoints[4] = { sf::Vector2f(100, 100), sf::Vector2f(100, 400), sf::Vector2f(400, 400), sf::Vector2f(400, 100) };
 
-    sf::Vector2f target = waypoints[currentWaypoint];
+    sf::Vector2f target = _waypoints[currentWaypoint];
     sf::Vector2f direction = target - shape.getPosition();
-    sf::Vector2f newPos = shape.getPosition();
 
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
@@ -201,39 +215,36 @@ void Enemy::FSMpatrol() {
     }
     else {
         direction /= distance;
-        newPos += direction * 0.2f;
     }
 
-    shape.setPosition(newPos);
-    circle.setPosition(newPos);
+    std::cout << this << " patrouille" << std::endl;
+
+    enemy.shape.move(direction * SPEED * deltaTime);
+    enemy.circle.move(direction * SPEED * deltaTime);
 }
 
-void Enemy::FSMchase(const sf::Vector2f& playerPos) {
+void Enemy::FSMchase(const float& deltaTime, const sf::Vector2f& playerPos) {
     sf::Vector2f direction = playerPos - shape.getPosition();
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-    sf::Vector2f newPos = shape.getPosition();
 
     if (distance > 0) {
         direction /= distance;
-        newPos += direction * 0.2f;
     }
 
-    shape.setPosition(newPos);
-    circle.setPosition(newPos);
+    shape.move(direction * SPEED * deltaTime);
+    circle.move(direction * SPEED * deltaTime);
 }
 
-void Enemy::FSMFlee(const sf::Vector2f& playerPos) {
+void Enemy::FSMFlee(const float& deltaTime, const sf::Vector2f& playerPos) {
     sf::Vector2f direction = playerPos - shape.getPosition();
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-    sf::Vector2f newPos = shape.getPosition();
 
     if (distance > 0) {
         direction /= distance;
-        newPos += direction * 0.2f;
     }
 
-    shape.setPosition(newPos);
-    circle.setPosition(newPos);
+    shape.move(direction * SPEED * deltaTime);
+    circle.move(direction * SPEED * deltaTime);
 }
 
 sf::Vector2i findFarthestTile(const sf::Vector2i& origin, const sf::Vector2i& gridSize) {
@@ -258,6 +269,7 @@ sf::Vector2i findFarthestTile(const sf::Vector2i& origin, const sf::Vector2i& gr
         }
     }
 
+    // Pour éviter les murs
     if (farthestTile == sf::Vector2i{0, 0}) {
         farthestTile = sf::Vector2i{ 1,1 };
     }

@@ -12,7 +12,7 @@ public:
     sf::Vector2f velocity;
     int health;
     bool enemyAttackPlayer = false;
-    virtual void update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> neededEntities) = 0;
+    virtual void update(const float& deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> neededEntities) = 0;
 
 public:
     bool isAlive() const;

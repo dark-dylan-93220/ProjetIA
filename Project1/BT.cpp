@@ -4,9 +4,9 @@
 void SequenceNode::AddChild(std::unique_ptr<BTNode> child) {
     children.push_back(std::move(child));
 }
-NodeState SequenceNode::Execute() {
+NodeState SequenceNode::Execute(const float& deltaTime) {
     for (auto& child : children) {
-        if (child->Execute() == NodeState::FAILURE) {
+        if (child->Execute(deltaTime) == NodeState::FAILURE) {
             return NodeState::FAILURE;
         }
     }
@@ -20,9 +20,9 @@ void SequenceNode::addGrid(Grid& _grid) {
 void SelectorNode::AddChild(std::unique_ptr<BTNode> child) {
     children.push_back(std::move(child));
 }
-NodeState SelectorNode::Execute() {
+NodeState SelectorNode::Execute(const float& deltaTime) {
     for (auto& child : children) {
-        if (child->Execute() == NodeState::SUCCESS) {
+        if (child->Execute(deltaTime) == NodeState::SUCCESS) {
             return NodeState::SUCCESS;
         }
     }
@@ -42,58 +42,72 @@ bool Blackboard::GetValue(const std::string& key) {
 }
 
 //----------------------------ConditionNode---------------------------------
-NodeState ConditionNode::Execute()  {
+NodeState ConditionNode::Execute(const float& deltaTime)  {
     return (blackboard.GetValue(key) == expectedValue) ? NodeState::SUCCESS : NodeState::FAILURE;
 }
 void ConditionNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
 //----------------------------CheckEnemyProximityNode---------------------------------
-NodeState CheckEnemyProximityNode::Execute() {
+NodeState CheckEnemyProximityNode::Execute(const float& deltaTime) {
     return (blackboard.GetValue(key) == expectedValue) ? NodeState::SUCCESS : NodeState::FAILURE;
 }
+
+//----------------------------PrintMessageNode---------------------------
+NodeState PrintMessageNode::Execute(const float& deltaTime) {
+    std::cout << message << std::endl;
+    return NodeState::SUCCESS;
+}
+
 //----------------------------ActionNode---------------------------------
 void chaseNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
-NodeState chaseNode::Execute() {
-    enemy->chase(1, grid); //suivre
+NodeState chaseNode::Execute(const float& deltaTime) {
+    enemy->chase(deltaTime, grid); //suivre
     return NodeState::SUCCESS;
 }
 
 void attackNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
-NodeState attackNode::Execute() {
-    enemy->attack(1, grid); //attaquer
+NodeState attackNode::Execute(const float& deltaTime) {
+    enemy->attack(deltaTime, grid); //attaquer
     return NodeState::SUCCESS;
 }
 
 void fleeNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
-NodeState fleeNode::Execute() {
-    enemy->flee(1, grid); //fuir
-    return NodeState::SUCCESS;
+NodeState fleeNode::Execute(const float& deltaTime) {
+    if (enemy->playerDetected && enemy->lowHP) {
+        enemy->flee(deltaTime, grid); //fuir
+        std::cout << enemy << " fuit." << std::endl;
+        return NodeState::SUCCESS;
+    }
+    return NodeState::FAILURE;
 }
 
 void patrolNode::addGrid(Grid& _grid) {
     grid = _grid;
 }
-NodeState patrolNode::Execute() {
-    enemy->patrol(1, grid); //fuir
-    return NodeState::SUCCESS;
+NodeState patrolNode::Execute(const float& deltaTime) {
+    if (!enemy->playerDetected) {
+        enemy->patrol(deltaTime, grid); //patrouiller
+        return NodeState::SUCCESS;
+    }
+    return NodeState::FAILURE;
 }
 
-void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, Blackboard& bb, std::shared_ptr<Entity>& _enemy,
+void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, std::shared_ptr<Enemy>& _enemy,
     bool& playerDetected, bool& playerInsight, bool& lowHP, Grid& grid)
 {
-    std::shared_ptr<Enemy> enemy = std::dynamic_pointer_cast<Enemy>(_enemy);
+    //std::shared_ptr<Enemy> enemy = _enemy;
 
     // Inscription des "valeurs" sur le blackboard
-    bb.SetValue("playerDetected", playerDetected);
     bb.SetValue("playerInsight", playerInsight);
-    bb.SetValue("lowHP", lowHP);
+    bb.SetValue("playerDetected", playerDetected);
+    bb.SetValue("flee", lowHP + playerDetected);
 
     // Noeuds racines
     auto root2 = std::make_unique<SelectorNode>();
@@ -101,22 +115,22 @@ void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, Blackbo
     // Ajout des ordres au noeud séquence
         // LowHP
     auto sequence = std::make_unique<SequenceNode>();
-    sequence->AddChild(std::make_unique<ConditionNode>(bb, "lowHP", 1));
-    std::unique_ptr<fleeNode> fleeN = std::make_unique<fleeNode>(enemy);
+    sequence->AddChild(std::make_unique<ConditionNode>(bb, "flee", 2));
+    std::unique_ptr<fleeNode> fleeN = std::make_unique<fleeNode>(_enemy);
     fleeN->addGrid(grid);
     sequence->AddChild(std::move(fleeN));
 
     // PlayerDetected
     auto sequence2 = std::make_unique<SequenceNode>();
     sequence2->AddChild(std::make_unique<ConditionNode>(bb, "playerDetected", 1));
-    std::unique_ptr<chaseNode> chaseN = std::make_unique<chaseNode>(enemy);
+    std::unique_ptr<chaseNode> chaseN = std::make_unique<chaseNode>(_enemy);
     chaseN->addGrid(grid);
     sequence2->AddChild(std::move(chaseN));
 
     // PlayerInsight
     auto sequence3 = std::make_unique<SequenceNode>();
     sequence3->AddChild(std::make_unique<ConditionNode>(bb, "playerInsight", 1));
-    std::unique_ptr<attackNode> attackN = std::make_unique<attackNode>(enemy);
+    std::unique_ptr<attackNode> attackN = std::make_unique<attackNode>(_enemy);
     attackN->addGrid(grid);
     sequence3->AddChild(std::move(attackN));
 
@@ -124,22 +138,22 @@ void InheritFromEveryone::makeTree(std::unique_ptr<SelectorNode>& root1, Blackbo
     root2->AddChild(std::move(sequence3));
 
     auto sequence4 = std::make_unique<SequenceNode>();
-    std::unique_ptr<patrolNode> patrolN = std::make_unique<patrolNode>(enemy);
+    std::unique_ptr<patrolNode> patrolN = std::make_unique<patrolNode>(_enemy);
     patrolN->addGrid(grid);
     sequence4->AddChild(std::move(patrolN));
 
     // Ajout du noeud séquence au noeud racine
-    root1->AddChild(std::move(sequence));
-    root1->AddChild(std::move(root2));
-    root1->AddChild(std::move(sequence4));
+    root->AddChild(std::move(sequence));
+    root->AddChild(std::move(root2));
+    root->AddChild(std::move(sequence4));
 }
 
-void InheritFromEveryone::executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP)
+void InheritFromEveryone::executeTree(std::unique_ptr<SelectorNode>& root, Blackboard& bb, bool& playerDetected, bool& playerInsight, bool& lowHP, const float& deltaTime, Enemy& _enemy)
 {
     // Mise à jour des "valeurs" sur le blackboard
     bb.SetValue("playerDetected", playerDetected);
     bb.SetValue("playerInsight", playerInsight);
-    bb.SetValue("lowHP", lowHP);
+    bb.SetValue("flee", lowHP + playerDetected);
     // Exécution du noeud racine
-    root->Execute();
+    root->Execute(deltaTime);
 }

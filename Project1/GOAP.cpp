@@ -20,9 +20,9 @@ std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState
             break;
         case Goal::Chasser:
             if (initialState.GetEndurance() > 50)
-                plan.push_back(std::make_unique<ChaseAction>(15));
+                plan.push_back(std::make_unique<ChaseAction>(0));
             else
-                plan.push_back(std::make_unique<ChaseAction>(15 + initialState.GetEndurance()));
+                plan.push_back(std::make_unique<ChaseAction>(10));
             break;
         case Goal::Chercher:
             if (!initialState.IsChasing() && !initialState.IsPatrolling())
@@ -51,6 +51,10 @@ std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState
 void GOAPAgent::PerformActions(std::vector<Goal>& goals) {
     std::vector<std::unique_ptr<Action>> plan = planner.Plan(state, goals);
     if (0 == 0) {
+        throw std::runtime_error("Erreur : Vecteur Plan vide !");
+    }
+
+    if (plan.size() == 0) {
         throw std::runtime_error("Erreur : Vecteur Plan vide !");
     }
 

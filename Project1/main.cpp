@@ -19,24 +19,40 @@ int main() {
     float enemyAtkCD = 0;
     float deltaTime = 0;
 
+    std::vector<sf::Vector2f> patrolEnemyOne = {
+        sf::Vector2f(80, 80),
+        sf::Vector2f(80, 200),
+        sf::Vector2f(320, 200),
+        sf::Vector2f(320, 80)
+    };
+
+    std::vector<sf::Vector2f> patrolEnemyTwo = {
+        sf::Vector2f(680, 80),
+        sf::Vector2f(680, 200),
+        sf::Vector2f(440, 200),
+        sf::Vector2f(440, 80)
+    };
+
     std::shared_ptr<Entity> player = std::make_shared<Player>(400.f, 400.f, 50);
     std::vector<std::shared_ptr<Entity>> players = { player };
-    std::vector<std::shared_ptr<Entity>> enemies = { std::make_shared<Enemy>(100.f, 100.f, 1), std::make_shared<Enemy>(700.f, 100.f, 100) };
+    std::vector<std::shared_ptr<Enemy>> enemiesDerived = {std::make_shared<Enemy>(100.f, 100.f, 1, patrolEnemyOne), std::make_shared<Enemy>(700.f, 100.f, 100, patrolEnemyTwo)};
+    std::vector<std::shared_ptr<Entity>> enemiesBase = { enemiesDerived[0], enemiesDerived[1] };
     
     auto root = std::make_unique<SelectorNode>();
+    auto root2 = std::make_unique<SelectorNode>();
 
     Grid grid;
-
     grid.loadFromFile("map.txt");
 
     Blackboard bb;
-
+    InheritFromEveryone method;
+    InheritFromEveryone method2;
 
     for (int i = 0; i < 2; ++i) {
         if (i == 0)
-            InheritFromEveryone::makeTree(root, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
+            method.makeTree(root, bb, enemiesDerived[i], enemiesDerived[i]->playerDetected, enemiesDerived[i]->playerInsight, enemiesDerived[i]->lowHP, grid);
         else
-            InheritFromEveryone::makeTree(root, bb, enemies[i], std::dynamic_pointer_cast<Enemy>(enemies[i])->playerDetected, std::dynamic_pointer_cast<Enemy>(enemies[i])->playerInsight, std::dynamic_pointer_cast<Enemy>(enemies[i])->lowHP, grid);
+            method2.makeTree(root2, bb, enemiesDerived[i], enemiesDerived[i]->playerDetected, enemiesDerived[i]->playerInsight, enemiesDerived[i]->lowHP, grid);
     }
 
     GOAPAgent agent;
@@ -65,29 +81,31 @@ int main() {
                 window.close();
         }
 
-        player->update(deltaTime, grid, enemies);
+        player->update(deltaTime, grid, enemiesBase);
 
-        for (auto& enemy : enemies)
+        int counter = 1;
+        for (auto& enemy : enemiesDerived)
         {
-            if (std::dynamic_pointer_cast<Enemy>(enemy) == enemy) 
+            if (enemy->isAlive())
             {
-                if (enemy->isAlive())
+                enemy->update(deltaTime, grid, players);
+                if(counter == 1)
+                    method.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime, *enemy);
+                else
+                    method2.executeTree(root2, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime, *enemy);
+                std::cout << std::endl;
+                if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive())
                 {
-                    goals = { Goal::Patrouiller, Goal::Chasser, Goal::Chercher, Goal::Fuir };
-                    agent.PerformActions(goals);
-                    std::cout << "Etat ennemi a l'adresse " << enemy.get() << " : ";
-                    InheritFromEveryone::executeTree(root, bb, std::dynamic_pointer_cast<Enemy>(enemy)->playerDetected, std::dynamic_pointer_cast<Enemy>(enemy)->playerInsight, std::dynamic_pointer_cast<Enemy>(enemy)->lowHP);
-                    std::cout << std::endl;
-                    enemy->update(deltaTime, grid, players);
-                    if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive()) {
-                        player->health -= 10;
-                        if (player->health <= 0) {
-                            player->health = 0;
-                        }
+                    player->health -= 10;
+                    if (player->health <= 0) 
+                    {
+                        player->health = 0;
                     }
                 }
+                counter++;
             }
         }
+
         enemyAtkCD += deltaTime;
         if (enemyAtkCD >= 1) {
             enemyAtkCD = 0;
@@ -95,8 +113,8 @@ int main() {
 
         window.clear();
         grid.draw(window);
-        window.draw(players[0]->shape);
-        for (const auto& enemy : enemies) {
+        window.draw(player->shape);
+        for (const auto& enemy : enemiesDerived) {
             if (enemy->isAlive()) {
                 window.draw(enemy->shape);
                 window.draw(enemy->circle);
