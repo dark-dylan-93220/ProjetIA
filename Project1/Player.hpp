@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "Enemy.hpp"
 
 class Player : public Entity {
 public:
@@ -11,6 +11,6 @@ public:
     int hp;
 
     Player(float x, float y, int hp);
-    void attack(std::vector<std::shared_ptr<Entity>> enemies);
-    void update(float deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> enemies) override;
+    void attack(std::vector<std::shared_ptr<Enemy>> enemies);
+    void update(const float& deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> enemies) override;
 };
