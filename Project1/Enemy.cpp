@@ -111,6 +111,8 @@ void Enemy::pathCalculation(Vector2f playerPos, Grid& grid, const float& deltaTi
 }
 
 void Enemy::enemyFollowsPath(const float& deltaTime) {
+    if (followPath.first.empty()) return;
+
     position = followPath.first[step] * CELL_SIZE;
 
     Vector2i shapePos = { (int)shape.getPosition().x, (int)shape.getPosition().y };
