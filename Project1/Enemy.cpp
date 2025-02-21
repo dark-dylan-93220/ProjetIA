@@ -17,6 +17,14 @@ Vector2i findFarthestTile(const Vector2i& origin, const Vector2i& gridSize);
 
 Enemy::Enemy(float x, float y, int hp, const vector<Vector2f>& waypoints, const string& id) : Entity(x, y, Color::Red, hp)
 {
+    font.loadFromFile("assets/font.ttf");
+    name.setFillColor(Color::Black);
+    name.setOutlineColor(Color::White);
+    name.setOutlineThickness(1);
+    name.setFont(font);
+    name.setString(id);
+    name.setCharacterSize(20);
+    name.setPosition(Vector2f(x + shape.getSize().x / 2 - name.getLocalBounds().width / 2, y + 60));
     // Utilisé pour identifier un ennemi avec sa méthode de refléxion
     identifiant = id;
     // Waypoints : points servants de repères pour la patrouille de l'ennemi, dépendant de chaque ennemi.
@@ -126,6 +134,7 @@ void Enemy::enemyFollowsPath(const float& deltaTime) {
 
     shape.move(direction * SPEED * deltaTime);
     circle.move(direction * SPEED * deltaTime);
+    name.move(direction * SPEED * deltaTime);
 
     if (step >= followPath.first.size()) {
         needsRepath = true;
@@ -154,8 +163,10 @@ void Enemy::patrol(const float& deltaTime) {
         direction /= distance;
     }
 
+    //--------------------------------------------
     shape.move(direction * SPEED * deltaTime);
     circle.move(direction * SPEED * deltaTime);
+    name.move(direction * SPEED * deltaTime);
 }
 
 void Enemy::update(const float& deltaTime, Grid& grid, vector<shared_ptr<Entity>> players) {

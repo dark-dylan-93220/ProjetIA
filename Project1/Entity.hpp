@@ -13,6 +13,8 @@ public:
     RectangleShape shape;
     Vector2f velocity;
     CircleShape circle;
+    Text name;
+    Font font;
     int health;
     bool enemyAttackPlayer = false;
     virtual void update(const float& deltaTime, Grid& grid, vector<shared_ptr<Entity>> neededEntities) = 0;

@@ -19,6 +19,19 @@ int main() {
     float enemyAtkCD = 0;
     float deltaTime = 0;
 
+    bool isGameOver = false; 
+    int colorGameOver = 0;
+    Texture gameOverTexture;
+    Sprite gameOverSprite;
+    gameOverTexture.loadFromFile("assets/gameOver.jpg");
+    gameOverSprite.setTexture(gameOverTexture);
+    gameOverSprite.setPosition(WINDOW_WIDTH / 2 - gameOverTexture.getSize().x / 2, WINDOW_HEIGHT / 2 - gameOverTexture.getSize().y / 2);
+
+    RectangleShape gameOverRect;
+    gameOverRect.setFillColor(Color(0, 0, 0, colorGameOver));
+    gameOverRect.setPosition(0, 0);
+    gameOverRect.setSize(Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
+
     // Note : Les 3 ennemis utilisent l'aglorithme A* pour la recherche de chemin
 
     // Ennemi FSM
@@ -64,6 +77,7 @@ int main() {
     // Grille du fond du jeu
     Grid grid;
     grid.loadFromFile("map.txt");
+    
 
     // Déclaration du behaviour tree (Ennemi n°2)
     auto root = make_unique<SelectorNode>();
@@ -97,44 +111,54 @@ int main() {
         player->update(deltaTime, grid, enemiesBase);
 
         int enemyIndex = 0;
-        for (auto& enemy : enemiesDerived) 
-        {
-            if (enemy->isAlive())
+        if (!isGameOver) {
+            for (auto& enemy : enemiesDerived)
             {
-                enemy->update(deltaTime, grid, players);
-
-                if (enemy->identifiant == "FSM") {
-                    enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
-                }
-                else if (enemy->identifiant == "BehaviourTree") {
-                    BehaviourTree.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime);
-                }
-                else if (enemy->identifiant == "GOAP") {
-                    enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
-                    // Méthode try-catch pour la gestion d'erreurs
-                    try {
-                        agent.PerformActions(goalState, actions, *enemy, deltaTime);
-                    }
-                    catch (const exception& e) {
-                        cerr << "Exception attrapee : " << e.what() << endl;
-                    }
-                }
-
-                if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive()) 
+                if (enemy->isAlive())
                 {
-                    player->health -= 10;
-                    if (player->health <= 0) 
-                    {
-                        player->health = 0;
+                    enemy->update(deltaTime, grid, players);
+
+                    if (enemy->identifiant == "FSM") {
+                        enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
                     }
+                    else if (enemy->identifiant == "BehaviourTree") {
+                        BehaviourTree.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime);
+                    }
+                    else if (enemy->identifiant == "GOAP") {
+                        enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
+                        // Méthode try-catch pour la gestion d'erreurs
+                        try {
+                            agent.PerformActions(goalState, actions, *enemy, deltaTime);
+                        }
+                        catch (const exception& e) {
+                            cerr << "Exception attrapee : " << e.what() << endl;
+                        }
+                    }
+
+                    if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive())
+                    {
+                        player->health -= 10;
+                        if (player->health <= 0)
+                        {
+                            player->health = 0;
+                        }
+                    }
+                    enemyIndex++;
                 }
-                enemyIndex++;
+            }
+            enemyAtkCD += deltaTime;
+            if (enemyAtkCD >= 1) {
+                enemyAtkCD = 0;
             }
         }
 
-        enemyAtkCD += deltaTime;
-        if (enemyAtkCD >= 1) {
-            enemyAtkCD = 0;
+        if (players[0]->health <= 0) {
+            isGameOver = true;
+            colorGameOver += 2;
+            gameOverRect.setFillColor(Color(0, 0, 0, colorGameOver));
+            if (colorGameOver >= 255) {
+                gameOverRect.setFillColor(Color(0, 0, 0, 255));
+            }
         }
 
         window.clear();
@@ -144,6 +168,13 @@ int main() {
             if (enemy->isAlive()) {
                 window.draw(enemy->circle);
                 window.draw(enemy->shape);
+                window.draw(enemy->name);
+            }
+        }
+        if (isGameOver) {
+            window.draw(gameOverRect);
+            if (colorGameOver >= 255) {
+                window.draw(gameOverSprite);
             }
         }
         window.display();
