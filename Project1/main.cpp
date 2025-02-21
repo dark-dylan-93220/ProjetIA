@@ -10,7 +10,7 @@ const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 
 int main() {
-    RenderWindow window(VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Jeu SFML - IA Ennemis");
+    RenderWindow window(VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Jeu SFML - IA Ennemis", Style::Titlebar | Style::Close);
     window.setFramerateLimit(60);
 
     Clock clock;
@@ -59,14 +59,14 @@ int main() {
     };
 
     // Déclarations du joueur et des ennemis
-    shared_ptr<Entity> player = make_shared<Player>(400.f, 400.f, 50);
+    shared_ptr<Player> player = make_shared<Player>(400.f, 400.f, 80);
     vector<shared_ptr<Entity>> players = { 
         player
     };
     vector<shared_ptr<Enemy>> enemiesDerived = {
-        make_shared<Enemy>(80.f, 80.f, 1, patrolEnemyOne, "FSM"), 
-        make_shared<Enemy>(680.f, 80.f, 100, patrolEnemyTwo, "BehaviourTree"), 
-        make_shared<Enemy>(680.f, 520.f, 100, patrolEnemyThree, "GOAP")
+        make_shared<Enemy>(80.f, 80.f, 85, patrolEnemyOne, "FSM"), 
+        make_shared<Enemy>(680.f, 80.f, 85, patrolEnemyTwo, "BehaviourTree"), 
+        make_shared<Enemy>(680.f, 520.f, 85, patrolEnemyThree, "GOAP")
     };
     vector<shared_ptr<Entity>> enemiesBase = { 
         enemiesDerived[0], 
@@ -88,19 +88,18 @@ int main() {
     // Déclaration de la méthode GOAP (Ennemi n°3)
     GOAPAgent agent;
         // SpecificAction(cout, conditions, effets, nom);
-    PatrollingAction patrol(5,  {"Tout"},        {"Patrolling", "Tout"}, "Patrolling");
-    ChaseAction      chase (15, {"Patrolling"},  {"Chase", "Tout"},      "Chase");
-    FleeAction       flee  (0,  {"Tout"},        {"Flee", "Tout"},       "Flee");
-    AttackAction     attack(5,  {"Chase"},       {"Attack", "Tout"},     "Attack");
+    PatrollingAction patrol(5,  {"Tout"}, {"Patrolling", "Tout"}, "Patrolling");
+    ChaseAction      chase (15, {"Tout"}, {"Chase", "Tout"},      "Chase");
+    FleeAction       flee  (0,  {"Tout"}, {"Flee", "Tout"},       "Flee");
+    AttackAction     attack(5,  {"Tout"}, {"Attack", "Tout"},     "Attack");
         // Vecteurs des actions possibles
-    vector<SpecificAction> actions = { patrol, chase, flee, attack };
+    vector<SpecificAction> actions = { patrol, chase, attack, flee };
     vector<string> effets = { "Patrolling", "Tout" };
     State goalState(effets); // But par défaut
 
     while (window.isOpen())
     {
         deltaTime = clock.restart().asSeconds();
-        cout << deltaTime << endl;
 
         while (window.pollEvent(event))
         {
@@ -118,37 +117,29 @@ int main() {
                 {
                     enemy->update(deltaTime, grid, players);
 
-                    if (enemy->identifiant == "FSM") {
-                        enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
-                    }
-                    else if (enemy->identifiant == "BehaviourTree") {
-                        BehaviourTree.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime);
-                    }
-                    else if (enemy->identifiant == "GOAP") {
-                        enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
-                        // Méthode try-catch pour la gestion d'erreurs
-                        try {
-                            agent.PerformActions(goalState, actions, *enemy, deltaTime);
-                        }
-                        catch (const exception& e) {
-                            cerr << "Exception attrapee : " << e.what() << endl;
-                        }
-                    }
-
-                    if (enemy->getStatutAtk() && (enemyAtkCD == 0) && player->isAlive())
-                    {
-                        player->health -= 10;
-                        if (player->health <= 0)
-                        {
-                            player->health = 0;
-                        }
-                    }
-                    enemyIndex++;
+                if (enemy->identifiant == "FSM") {
+                    enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
                 }
-            }
-            enemyAtkCD += deltaTime;
-            if (enemyAtkCD >= 1) {
-                enemyAtkCD = 0;
+                else if (enemy->identifiant == "BehaviourTree") {
+                    BehaviourTree.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime);
+                }
+                else if (enemy->identifiant == "GOAP") {
+                    enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
+                    // Méthode try-catch pour la gestion d'erreurs
+                    try {
+                        agent.PerformActions(goalState, actions, *enemy, deltaTime);
+                        agent.PrintState(agent.state);
+                    }
+                    catch (const exception& e) {
+                        cerr << "Exception attrapee : " << e.what() << endl;
+                    }
+                }
+
+                if (enemy->getStatutAtk() && player->isAlive() && !player->shieldActive) {
+                    enemy->attack();
+                    player->takeDamage(10);
+                }
+                enemyIndex++;
             }
         }
 

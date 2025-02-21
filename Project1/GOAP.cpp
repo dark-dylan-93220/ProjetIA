@@ -103,8 +103,11 @@ void GOAPAgent::PerformActions(State& goalState, vector<SpecificAction>& actions
         else if (action.id == "Chase" || action.id == "Flee") {
             enemy.enemyFollowsPath(deltaTime);
         }
-        else if (action.id == "Attack") {
-            enemy.attack(deltaTime);
+        else if (action.id == "Attack" && enemy.attackCooldown >= 1.f) {
+            enemy.enemyAttackPlayer = true;
+        }
+        else {
+            enemy.enemyAttackPlayer = false;
         }
     }
 }
@@ -113,6 +116,7 @@ void GOAPAgent::PrintState(State& currentState) {
     cout << "-----------------------------------------" << endl;
     cout << "Etat de l'ennemi GOAP :";
     for (auto& property : state.properties) {
+        if (property == "Tout") continue;
         cout << " " << property << endl;
     }
     cout << "-----------------------------------------" << endl;
