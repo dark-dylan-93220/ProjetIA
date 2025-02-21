@@ -9,6 +9,7 @@ public:
     static constexpr float ATTACK_COOLDOWN = 0.5f;
     float attackTimer;
     int hp;
+    bool shieldActive = false;
 
     Player(float x, float y, int hp);
     void attack(vector<shared_ptr<Enemy>> enemies);

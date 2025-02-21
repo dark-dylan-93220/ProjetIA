@@ -67,11 +67,15 @@ void Enemy::pathCalculation(Vector2f playerPos, Grid& grid, const float& deltaTi
         // L'ennemi fuit
         if (lowHP) {
             result = async(launch::async, Pathfinding::findPath, ref(grid), ref(start), ref(fleeEnd));
+            // Pour attendre la fin de la tâche du pathfinding
+            result.wait();
             followPathSteps = result.get();
         }
         // L'ennemi chasse
         else {
             future<vector<Vector2i>> result = async(launch::async, Pathfinding::findPath, ref(grid), ref(start), ref(end));
+            // Pour attendre la fin de la tâche du pathfinding
+            result.wait();
             followPathSteps = result.get();
         }
 
@@ -135,8 +139,11 @@ void Enemy::enemyFollowsPath(const float& deltaTime) {
     AStarMoveDelay += deltaTime;
 }
 
-void Enemy::attack(const float& deltaTime) {
-    cout << this << " attaque!" << endl;
+void Enemy::attack() {
+    if (attackCooldown >= 1.f && enemyAttackPlayer) {
+        cout << this << " attaque!" << endl;
+        attackCooldown = 0.f;
+    }
 }
 
 void Enemy::patrol(const float& deltaTime) {
@@ -163,6 +170,7 @@ void Enemy::update(const float& deltaTime, Grid& grid, vector<shared_ptr<Entity>
     playerDetected = false;
     playerInsight = false;
     enemyAttackPlayer = false;
+    attackCooldown += deltaTime;
     if (health <= 10) { lowHP = true; }
 
     // Fonction qui utilise A* et choisis de la suite de l'état d'un ennemi, quelle que soit sa méthode de réfléxion.
@@ -213,16 +221,26 @@ void Enemy::FSMAndGOAPUpdate(const float& deltaTime, const bool& playerDetected,
     }
     else if (identifiant == "GOAP") {
         if (lowHP) {
-            enemyGoal.properties = { "Flee" };
+            enemyAttackPlayer = false;
+            enemyGoal.properties = { "Flee", "Tout" };
         }
         else if (playerDetected && !playerInsight) {
-            enemyGoal.properties = { "Chase" };
+            enemyAttackPlayer = false;
+            enemyGoal.properties = { "Chase", "Tout" };
         }
         else if (playerDetected && playerInsight) {
-            enemyGoal.properties = { "Attack" };
+            enemyAttackPlayer = true;
+            enemyGoal.properties = { "Attack", "Tout" };
         }
         else {
-            enemyGoal.properties = { "Patrolling", "Tout" };
+            if (playerInsight) {
+                enemyAttackPlayer = true;
+                enemyGoal.properties = { "Attack", "Tout" };
+            }
+            else {
+                enemyAttackPlayer = false;
+                enemyGoal.properties = { "Patrolling", "Tout" };
+            }
         }
         enemyState.properties = enemyGoal.properties;
     }
