@@ -30,6 +30,7 @@ Enemy::Enemy(float x, float y, int hp, const vector<Vector2f>& waypoints, const 
     // Waypoints : points servants de repères pour la patrouille de l'ennemi, dépendant de chaque ennemi.
     _waypoints = waypoints;
     // Booléens servant à identifier l'état d'un ennemi
+    attackCooldown = 0.f;
     needsRepath = false;
     playerDetected = false;
     playerInsight = false;

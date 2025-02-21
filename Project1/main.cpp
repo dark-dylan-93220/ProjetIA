@@ -107,46 +107,46 @@ int main() {
                 window.close();
         }
 
-        player->update(deltaTime, grid, enemiesBase);
-
-        int enemyIndex = 0;
         if (!isGameOver) {
+            player->update(deltaTime, grid, enemiesBase);
+            int enemyIndex = 0;
             for (auto& enemy : enemiesDerived)
             {
                 if (enemy->isAlive())
                 {
                     enemy->update(deltaTime, grid, players);
 
-                if (enemy->identifiant == "FSM") {
-                    enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
-                }
-                else if (enemy->identifiant == "BehaviourTree") {
-                    BehaviourTree.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime);
-                }
-                else if (enemy->identifiant == "GOAP") {
-                    enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
-                    // Méthode try-catch pour la gestion d'erreurs
-                    try {
-                        agent.PerformActions(goalState, actions, *enemy, deltaTime);
-                        agent.PrintState(agent.state);
+                    if (enemy->identifiant == "FSM") {
+                        enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
                     }
-                    catch (const exception& e) {
-                        cerr << "Exception attrapee : " << e.what() << endl;
+                    else if (enemy->identifiant == "BehaviourTree") {
+                        BehaviourTree.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime);
                     }
-                }
+                    else if (enemy->identifiant == "GOAP") {
+                        enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
+                        // Méthode try-catch pour la gestion d'erreurs
+                        try {
+                            agent.PerformActions(goalState, actions, *enemy, deltaTime);
+                            agent.PrintState(agent.state);
+                        }
+                        catch (const exception& e) {
+                            cerr << "Exception attrapee : " << e.what() << endl;
+                        }
+                    }
 
-                if (enemy->getStatutAtk() && player->isAlive() && !player->shieldActive) {
-                    enemy->attack();
-                    player->takeDamage(10);
+                    if (enemy->getStatutAtk() && player->isAlive() && !player->shieldActive && enemy->attackCooldown >= 1.f) {
+                        enemy->attack();
+                        player->takeDamage(10);
+                    }
+                    enemyIndex++;
                 }
-                enemyIndex++;
             }
         }
 
-        if (players[0]->health <= 0) {
+        if (!player->isAlive()) {
             isGameOver = true;
             colorGameOver += 2;
-            gameOverRect.setFillColor(Color(0, 0, 0, colorGameOver));
+            gameOverRect.setFillColor(Color(0,0,0,colorGameOver));
             if (colorGameOver >= 255) {
                 gameOverRect.setFillColor(Color(0, 0, 0, 255));
             }
@@ -169,7 +169,6 @@ int main() {
             }
         }
         window.display();
-
     }
 
     return 0;
