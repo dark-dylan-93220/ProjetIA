@@ -148,7 +148,7 @@ int main() {
                     enemyIndex++;
                 }
             }
-            cout << "---------- FIN DE BOUCLE ----------" << endl;
+            cout << "---------- FIN DE BOUCLE ----------" << endl << endl;
         }
         
         if (!player->isAlive()) {
