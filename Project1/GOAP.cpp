@@ -4,7 +4,7 @@
 #include <unordered_set>
 
 GOAPAgent::GOAPAgent() {
-    state.properties = { "Patrolling", "Tout" }; // Par défaut, l'agent patrouille
+    state.properties = { "Patrolling", "Tout" }; // Par dÃ©faut, l'agent patrouille
 }
 
 vector<SpecificAction> GOAPPlanner::Plan(const State& initialState, State& goalState, vector<SpecificAction>& actions) {
@@ -70,11 +70,13 @@ vector<SpecificAction> GOAPPlanner::Plan(const State& initialState, State& goalS
     return plan;
 }
 
+
 void GOAPAgent::PerformActions(State& goalState, vector<SpecificAction>& actions, Enemy& enemy, const float& deltaTime) {
 
     vector<SpecificAction> plan = planner.Plan(state, goalState, actions);
 
-    // Méthode runtime_error utilisée pour le try-catch
+
+    // MÃ©thode runtime_error utilisÃ©e pour le try-catch
     if (plan.size() == 0) {
         throw runtime_error("Erreur : Vecteur Plan vide !");
     }
