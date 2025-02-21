@@ -11,6 +11,6 @@ public:
     int hp;
 
     Player(float x, float y, int hp);
-    void attack(std::vector<std::shared_ptr<Enemy>> enemies);
-    void update(const float& deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> enemies) override;
+    void attack(vector<shared_ptr<Enemy>> enemies);
+    void update(const float& deltaTime, Grid& grid, vector<shared_ptr<Entity>> enemies) override;
 };
