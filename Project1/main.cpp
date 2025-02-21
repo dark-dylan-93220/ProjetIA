@@ -108,6 +108,7 @@ int main() {
         }
 
         if (!isGameOver) {
+            cout << "HP joueur : " << player->health << endl;
             player->update(deltaTime, grid, enemiesBase);
             int enemyIndex = 0;
             for (auto& enemy : enemiesDerived)
@@ -117,12 +118,18 @@ int main() {
                     enemy->update(deltaTime, grid, players);
 
                     if (enemy->identifiant == "FSM") {
+                        cout << "-----------------------------" << endl;
+                        cout << "HP FSM : " << enemy->health << endl;
                         enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
                     }
                     else if (enemy->identifiant == "BehaviourTree") {
+                        cout << "-----------------------------" << endl;
+                        cout << "HP Behavior Tree : " << enemy->health << endl;
                         BehaviourTree.executeTree(root, bb, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, deltaTime);
                     }
                     else if (enemy->identifiant == "GOAP") {
+                        cout << "-----------------------------" << endl;
+                        cout << "HP GOAP : " << enemy->health << endl;
                         enemy->FSMAndGOAPUpdate(deltaTime, enemy->playerDetected, enemy->playerInsight, enemy->lowHP, players[0]->shape.getPosition(), goalState, agent.state);
                         // Méthode try-catch pour la gestion d'erreurs
                         try {
@@ -141,8 +148,9 @@ int main() {
                     enemyIndex++;
                 }
             }
+            cout << "---------- FIN DE BOUCLE ----------" << endl;
         }
-
+        
         if (!player->isAlive()) {
             isGameOver = true;
             colorGameOver += 2;

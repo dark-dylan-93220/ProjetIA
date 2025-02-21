@@ -153,7 +153,6 @@ void Enemy::enemyFollowsPath(const float& deltaTime) {
 
 void Enemy::attack() {
     if (attackCooldown >= 1.f && enemyAttackPlayer) {
-        cout << this << " attaque!" << endl;
         attackCooldown = 0.f;
     }
 }
@@ -195,6 +194,7 @@ void Enemy::FSMAndGOAPUpdate(const float& deltaTime, const bool& playerDetected,
     if (identifiant == "FSM") {
         switch (currentState) {
         case PATROL:
+            cout << "L'ennemi FSM patrouille" << endl;
             patrol(deltaTime);
             enemyAttackPlayer = false;
             if (lowHP) {
@@ -206,6 +206,7 @@ void Enemy::FSMAndGOAPUpdate(const float& deltaTime, const bool& playerDetected,
             break;
 
         case CHASE:
+            cout << "L'ennemi FSM chasse" << endl;
             enemyFollowsPath(deltaTime);
             enemyAttackPlayer = false;
 
@@ -223,11 +224,13 @@ void Enemy::FSMAndGOAPUpdate(const float& deltaTime, const bool& playerDetected,
             break;
 
         case ATTACK:
+            cout << "L'ennemi FSM attaque" << endl;
             enemyAttackPlayer = true;
             if (lowHP) { currentState = FLEE; }
             break;
 
         case FLEE:
+            cout << "L'ennemi FSM fuit" << endl;
             enemyAttackPlayer = false;
             enemyFollowsPath(deltaTime);
             break;

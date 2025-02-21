@@ -53,6 +53,7 @@ NodeState PrintMessageNode::Execute(const float& deltaTime) {
 //----------------------------ChaseNode---------------------------------
 NodeState chaseNode::Execute(const float& deltaTime) {
     if (!enemy->lowHP) {
+        cout << "L'ennemi behavior tree chasse" << endl;
         enemy->enemyFollowsPath(deltaTime); //suivre
         return NodeState::SUCCESS;
     }
@@ -61,6 +62,7 @@ NodeState chaseNode::Execute(const float& deltaTime) {
 
 //----------------------------AttackNode--------------------------------
 NodeState attackNode::Execute(const float& deltaTime) {
+    cout << "L'ennemi behavior tree attaque" << endl;
     enemy->attack(); //attaquer
     return NodeState::SUCCESS;
 }
@@ -68,7 +70,7 @@ NodeState attackNode::Execute(const float& deltaTime) {
 NodeState fleeNode::Execute(const float& deltaTime) {
     if (enemy->playerDetected && enemy->lowHP) {
         enemy->enemyFollowsPath(deltaTime); //fuir
-        cout << enemy << " fuit." << endl;
+        cout << "L'ennemi behavior tree fuit" << endl;
         return NodeState::SUCCESS;
     }
     return NodeState::FAILURE;
@@ -77,6 +79,7 @@ NodeState fleeNode::Execute(const float& deltaTime) {
 NodeState patrolNode::Execute(const float& deltaTime) {
     if (!enemy->playerDetected) {
         enemy->patrol(deltaTime); //patrouiller
+        cout << "L'ennemi behavior tree patrouille" << endl;
         return NodeState::SUCCESS;
     }
     return NodeState::FAILURE;

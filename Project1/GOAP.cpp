@@ -13,9 +13,9 @@ vector<SpecificAction> GOAPPlanner::Plan(const State& initialState, State& goalS
 
     while (true) {
         unordered_set<string> currentProperties(currentState.properties.begin(), currentState.properties.end());
-        bool allGoalsMet = std::all_of(goalState.properties.begin(), goalState.properties.end(), [&](const std::string& prop) 
+        bool allGoalsMet = all_of(goalState.properties.begin(), goalState.properties.end(), [&](const string& prop) 
             {
-                return std::find(currentState.properties.begin(), currentState.properties.end(), prop) != currentState.properties.end();
+                return find(currentState.properties.begin(), currentState.properties.end(), prop) != currentState.properties.end();
             }
         );
 
@@ -82,7 +82,7 @@ void GOAPAgent::PerformActions(State& goalState, vector<SpecificAction>& actions
     }
 
     if (!plan.empty()) {
-        cout << "Plan trouve : ";
+        cout << "[Ennemi GOAP] Plan trouve : ";
         int count = 0;
         for (const auto& action : plan) {
             if (count == plan.size() - 1) {
@@ -113,11 +113,9 @@ void GOAPAgent::PerformActions(State& goalState, vector<SpecificAction>& actions
 }
 
 void GOAPAgent::PrintState(State& currentState) {
-    cout << "-----------------------------------------" << endl;
-    cout << "Etat de l'ennemi GOAP :";
+    cout << "L'ennemi GOAP ";
     for (auto& property : state.properties) {
         if (property == "Tout") continue;
         cout << " " << property << endl;
     }
-    cout << "-----------------------------------------" << endl;
 }
