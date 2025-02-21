@@ -61,7 +61,7 @@ NodeState chaseNode::Execute(const float& deltaTime) {
 
 //----------------------------AttackNode--------------------------------
 NodeState attackNode::Execute(const float& deltaTime) {
-    enemy->attack(deltaTime); //attaquer
+    enemy->attack(); //attaquer
     return NodeState::SUCCESS;
 }
 

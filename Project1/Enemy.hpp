@@ -10,6 +10,7 @@ public:
     bool playerDetected; 
     bool playerInsight; 
     bool lowHP;
+    float attackCooldown = 0.f;
     string identifiant;
 
     Vector2f playerPos;
@@ -38,7 +39,7 @@ public:
 	void pathCalculation(Vector2f playerPos, Grid& grid, const float& deltaTime);
 
     // Les 3 ennemis utilisent ces foncions communément
-    void attack(const float& deltaTime);
+    void attack();
     void patrol(const float& deltaTime);
     void enemyFollowsPath(const float& deltaTime);
 
