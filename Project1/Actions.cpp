@@ -2,79 +2,77 @@
 #include "State.hpp"
 
 
-// --- PATROLLING ACTION --- //
-PatrollingAction::PatrollingAction(int _cost) {
-    cost = _cost;
+void SpecificAction::applyAction(const Action& action, State& state) {
+    for (const auto& effect : action.effects) {
+        state.addProperty(effect);
+    }
+    for (const auto& condition : action.conditions) {
+        state.removeProperty(condition);
+    }
 }
-bool PatrollingAction::CanExecute(const State& state) {
-    return !state.IsChasing() || state.IsSearching();
+
+// --- ACTION FUNCTIONS --- //
+bool SpecificAction::CanExecute(const Action& action, State& state) {
+    for (const auto& condition : action.conditions) {
+        if (!state.hasProperty(condition)) {
+            return false;
+        }
+    }
+    return true;
 }
-void PatrollingAction::Execute(State& state) {
-    std::cout << "L'agent patrouille.\n";
-    state.SetPatrollingDuration(10.f);
-    state.setSearching(false);
-    state.setPatrolling(true);
+void SpecificAction::Execute(State& state, const string& action) {
+    // Nettoyage du state
+    state.addProperty(action);
+    if (state.hasProperty("Flee")) {
+        state.removeProperty("Patrolling");
+        state.removeProperty("Chase");
+        state.removeProperty("Attack");
+    }
+    else if (state.hasProperty("Patrolling") || state.hasProperty("Attack")) {
+        state.removeProperty("Chase");
+        state.removeProperty("Attack");
+    }
+    else if (state.hasProperty("Chase")) {
+        state.removeProperty("Patrolling");
+        state.removeProperty("Attack");
+    }
 }
-void PatrollingAction::changeCost(int newCost) {
+
+void SpecificAction::changeCost(int newCost) {
     cost = newCost;
 }
-int PatrollingAction::GetCost() {
+int SpecificAction::GetCost() {
     return cost;
+}
+
+// --- PATROLLING ACTION --- //
+PatrollingAction::PatrollingAction(int _cost, const vector<string>& _conditions, const vector<string>& _effects, const string& _id) {
+    cost = _cost;
+    conditions = _conditions;
+    effects = _effects;
+    id = _id;
 }
 
 // --- CHASE ACTION --- //
-ChaseAction::ChaseAction(int _cost) {
+ChaseAction::ChaseAction(int _cost, const vector<string>& _conditions, const vector<string>& _effects, const string& _id) {
     cost = _cost;
-}
-bool ChaseAction::CanExecute(const State& state) {
-    return state.GetEndurance() > 10;
-}
-void ChaseAction::Execute(State& state) {
-    std::cout << "L'agent chasse le joueur.\n";
-    state.SetChasing(true);
-}
-void ChaseAction::changeCost(int newCost) {
-    cost = newCost;
-}
-int ChaseAction::GetCost() {
-    return cost;
+    conditions = _conditions;
+    effects = _effects;
+    id = _id;
 }
 
 // --- SEARCH PLAYER ACTION --- //
-SearchPlayerAction::SearchPlayerAction(int _cost) {
+AttackAction::AttackAction(int _cost, const vector<string>& _conditions, const vector<string>& _effects, const string& _id) {
     cost = _cost;
-}
-bool SearchPlayerAction::CanExecute(const State& state) {
-    return state.IsChasing();  // Peut chercher le joueur seulement s'il chasse
-}
-void SearchPlayerAction::Execute(State& state) {
-    std::cout << "L'agent cherche le joueur.\n";
-    state.SetChasing(false);
-    state.setSearching(true);
-}
-void SearchPlayerAction::changeCost(int newCost) {
-    cost = newCost;
-}
-int SearchPlayerAction::GetCost() {
-    return cost;
+    conditions = _conditions;
+    effects = _effects;
+    id = _id;
 }
 
-// FLEE ACTION
-FleeAction::FleeAction(int _cost) {
+// --- FLEE ACTION --- //
+FleeAction::FleeAction(int _cost, const vector<string>& _conditions, const vector<string>& _effects, const string& _id) {
     cost = _cost;
-}
-bool FleeAction::CanExecute(const State& state) {
-    return state.GetHP() <= 10;
-}
-void FleeAction::Execute(State& state) {
-    std::cout << "L'agent fuit.\n";
-    state.SetChasing(false);
-    state.setSearching(false);
-    state.setPatrolling(false);
-}
-void FleeAction::changeCost(int newCost) {
-    cost = newCost;
-}
-int FleeAction::GetCost() {
-    return cost;
+    conditions = _conditions;
+    effects = _effects;
+    id = _id;
 }

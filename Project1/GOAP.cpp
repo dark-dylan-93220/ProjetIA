@@ -1,75 +1,119 @@
 #include "GOAP.hpp"
 
 #include <algorithm>
+#include <unordered_set>
 
 GOAPAgent::GOAPAgent() {
-    state.SetEndurance(100);
-    state.setHP(100);
-    state.setPatrolling(true);
+    state.properties = { "Patrolling", "Tout" }; // Par d√©faut, l'agent patrouille
 }
 
-std::vector<std::unique_ptr<Action>> GOAPPlanner::Plan(const State& initialState, std::vector<Goal>& goals) {
-    std::vector<std::unique_ptr<Action>> plan;
+vector<SpecificAction> GOAPPlanner::Plan(const State& initialState, State& goalState, vector<SpecificAction>& actions) {
+    vector<SpecificAction> plan;
+    State currentState = initialState;
 
-    for (auto& goal : goals) {
+    while (true) {
+        unordered_set<string> currentProperties(currentState.properties.begin(), currentState.properties.end());
+        bool allGoalsMet = std::all_of(goalState.properties.begin(), goalState.properties.end(), [&](const std::string& prop) 
+            {
+                return std::find(currentState.properties.begin(), currentState.properties.end(), prop) != currentState.properties.end();
+            }
+        );
 
-        switch (goal) {
-        case Goal::Patrouiller:
-            if (!initialState.IsChasing())
-                plan.push_back(std::make_unique<PatrollingAction>(5));
-            break;
-        case Goal::Chasser:
-            if (initialState.GetEndurance() > 50)
-                plan.push_back(std::make_unique<ChaseAction>(0));
-            else
-                plan.push_back(std::make_unique<ChaseAction>(10));
-            break;
-        case Goal::Chercher:
-            if (!initialState.IsChasing() && !initialState.IsPatrolling())
-                plan.push_back(std::make_unique<SearchPlayerAction>(7));
-            else
-                plan.push_back(std::make_unique<PatrollingAction>(5));
-            break;
-        case Goal::Fuir: // PrioritÈ
-            if (initialState.GetHP() > 10)
-                plan.push_back(std::make_unique<FleeAction>(10));
-            else  // Cout nul quand vie est faible
-                plan.push_back(std::make_unique<FleeAction>(0));
-            break;
-        default:
+        if (currentState.properties == goalState.properties) {
+            plan.clear();
+            if (goalState.hasProperty("Patrolling")) {
+                plan.push_back(PatrollingAction(5, { "Tout" }, { "Patrolling", "Tout" }, "Patrolling"));
+            }
+            else if (goalState.hasProperty("Chase")) {
+                plan.push_back(ChaseAction(15, { "Patrolling" }, { "Chase", "Tout" }, "Chase"));
+            }
+            else if (goalState.hasProperty("Flee")) {
+                plan.push_back(FleeAction(0, { "Tout" }, { "Flee", "Tout" }, "Flee"));
+            }
+            else if (goalState.hasProperty("Attack")) {
+                plan.push_back(AttackAction(5, { "Chase" }, { "Attack", "Tout" }, "Attack"));
+            }
+        }
+
+        if (allGoalsMet) {
             break;
         }
 
-    }
+        int minCost = INT_MAX;
+        SpecificAction* bestAction = nullptr;
 
-    // Pour Èxecuter les actions les moins couteuses en premier
-    std::sort(plan.begin(), plan.end());
+        for (auto& action : actions) {
+            if (action.CanExecute(action, currentState) && action.GetCost() < minCost) {
+                minCost = action.GetCost();
+                bestAction = &action;
+            }
+        }
+
+        if (bestAction != nullptr) {
+            bestAction->Execute(currentState, bestAction->id);
+        }
+        else {
+            cout << "Aucune action executable trouvee." << endl;
+            return {};
+        }
+
+        if (minCost == INT_MAX) {
+            cout << "Aucun plan trouve." << endl;
+            return {};
+        }
+
+        SpecificAction::applyAction(*bestAction, currentState);
+        plan.push_back(*bestAction);
+        
+    }
 
     return plan;
 }
 
-void GOAPAgent::PerformActions(std::vector<Goal>& goals) {
-    std::vector<std::unique_ptr<Action>> plan = planner.Plan(state, goals);
 
+void GOAPAgent::PerformActions(State& goalState, vector<SpecificAction>& actions, Enemy& enemy, const float& deltaTime) {
+
+    vector<SpecificAction> plan = planner.Plan(state, goalState, actions);
+
+
+    // M√©thode runtime_error utilis√©e pour le try-catch
     if (plan.size() == 0) {
-        throw std::runtime_error("Erreur : Vecteur Plan vide !");
+        throw runtime_error("Erreur : Vecteur Plan vide !");
+    }
+
+    if (!plan.empty()) {
+        cout << "Plan trouve : ";
+        int count = 0;
+        for (const auto& action : plan) {
+            if (count == plan.size() - 1) {
+                cout << action.id << " (cout: " << action.cost << ")" << endl;
+            }
+            else {
+                cout << action.id << " (cout: " << action.cost << ") -> ";
+            }
+            count++;
+        }
     }
 
     for (auto& action : plan) {
-        if (action->CanExecute(state)) {
-            action->Execute(state);
+        //action.Execute(state, action.id);
+        if (action.id == "Patrolling") {
+            enemy.patrol(deltaTime);
         }
-        else {
-            std::cout << "Action impossible : " << typeid(*action).name() << "\n";
+        else if (action.id == "Chase" || action.id == "Flee") {
+            enemy.enemyFollowsPath(deltaTime);
+        }
+        else if (action.id == "Attack") {
+            enemy.attack(deltaTime);
         }
     }
 }
 
-void GOAPAgent::PrintState() {
-    std::cout << "Niveau d'endurance................. : " << state.GetEndurance() << "\n";
-    std::cout << "Niveau d'HP........................ : " << state.GetHP() << "\n";
-    std::cout << "DurÈe de patrouille................ : " << state.GetPatrollingDuration() << "\n";
-    std::cout << "Est-il en train de patrouiller..... : " << (state.IsPatrolling() ? "Oui" : "Non") << "\n";
-    std::cout << "Est-il en train de chasser......... : " << (state.IsChasing() ? "Oui" : "Non") << "\n";
-    std::cout << "Est-il en train de chercher........ : " << (state.IsPatrolling() ? "Oui" : "Non") << "\n";
+void GOAPAgent::PrintState(State& currentState) {
+    cout << "-----------------------------------------" << endl;
+    cout << "Etat de l'ennemi GOAP :";
+    for (auto& property : state.properties) {
+        cout << " " << property << endl;
+    }
+    cout << "-----------------------------------------" << endl;
 }

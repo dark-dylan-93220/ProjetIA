@@ -4,57 +4,47 @@
 
 class Action {
 public:
-    virtual bool CanExecute(const State& state) = 0;
-    virtual void Execute(State& state) = 0;
+    virtual bool CanExecute(const Action& action, State& state) = 0;
+    virtual void Execute(State& state, const string& action) = 0;
     virtual void changeCost(int newCost) = 0;
     virtual int  GetCost() = 0;
     virtual ~Action() {}
-};
-
-class PatrollingAction : public Action {
-private:
-    int cost;
 
 public:
-    PatrollingAction(int _cost);
-    bool CanExecute(const State& state) override;
-    void Execute(State& state) override;
+    int cost;
+    string id;
+    vector<string> conditions;
+    vector<string> effects;
+};
+
+class SpecificAction : public Action {
+public:
+    // Setters
+    static void applyAction(const Action& action, State& state);
     void changeCost(int newCost) override;
+    void Execute(State& state, const string& action) override;
+    
+    // Getters
+    bool CanExecute(const Action& action, State& state) override;
     int GetCost() override;
 };
 
-class ChaseAction : public Action {
-private:
-    int cost;
-
+class PatrollingAction : public SpecificAction {
 public:
-    ChaseAction(int _cost);
-    bool CanExecute(const State& state) override;
-    void Execute(State& state) override;
-    void changeCost(int newCost) override;
-    int GetCost() override;
+    PatrollingAction(int _cost, const vector<string>& conditions, const vector<string>& effects, const string& id);
 };
 
-class SearchPlayerAction : public Action {
-private:
-    int cost;
-
+class ChaseAction : public SpecificAction {
 public:
-    SearchPlayerAction(int _cost);
-    bool CanExecute(const State& state) override;
-    void Execute(State& state) override;
-    void changeCost(int newCost) override;
-    int GetCost() override;
+    ChaseAction(int _cost, const vector<string>& conditions, const vector<string>& effects, const string& id);
 };
 
-class FleeAction : public Action {
-private:
-    int cost;
-
+class AttackAction : public SpecificAction {
 public:
-    FleeAction(int _cost);
-    bool CanExecute(const State& state) override;
-    void Execute(State& state) override;
-    void changeCost(int newCost) override;
-    int GetCost() override;
+    AttackAction(int _cost, const vector<string>& conditions, const vector<string>& effects, const string& id);
+};
+
+class FleeAction : public SpecificAction {
+public:
+    FleeAction(int _cost, const vector<string>& conditions, const vector<string>& effects, const string& id);
 };

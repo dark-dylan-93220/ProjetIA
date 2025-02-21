@@ -3,41 +3,21 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
+
+using namespace std;
 
 class State {
-private:
-    bool isChasing;
-    bool isPatrolling;
-    bool isSearching;
-    int endurance;
-    int hp;
-    float patrollingDuration;
 public:
-    State();
+    vector<string> properties;
+public:
+    State(const vector<string>& baseProperties);
 
     // Getters
-        // HP
-    int GetHP() const;
-        // Patrolling
-    bool IsPatrolling() const;
-    float GetPatrollingDuration() const;
-        // Searching
-    bool IsSearching() const;
-        // Chasing
-    bool IsChasing() const;
-    int GetEndurance() const;
+    bool hasProperty(const string& property) const;
 
     // Setters
-        // HP
-    void setHP(int level);
-        // Patrolling
-    void setPatrolling(bool patrolling);
-    void SetPatrollingDuration(float level);
-        // Searching
-    void setSearching(bool searching);
-        // Chasing
-    void SetChasing(bool chasing);
-    void ReduceEndurance(int malus);
-    void SetEndurance(int level);
+    void addProperty(const string& property);
+    void removeProperty(const string& property);
     
 };

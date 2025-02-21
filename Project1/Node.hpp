@@ -3,12 +3,15 @@
 #include <SFML/System/Vector2.hpp>
 #include <cmath>
 
+using namespace std;
+using namespace sf;
+
 struct Node {
-    sf::Vector2i position;
+    Vector2i position;
     float gCost, hCost, fCost;
     Node* parent;
 
-    Node(sf::Vector2i pos);
-    void calculateCosts(sf::Vector2i endPos, float newG);
-    int calculateHeuristic(sf::Vector2i endPos);
+    Node(Vector2i pos);
+    void calculateCosts(Vector2i endPos, float newG);
+    int calculateHeuristic(Vector2i endPos);
 };

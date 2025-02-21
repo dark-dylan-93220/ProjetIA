@@ -4,24 +4,24 @@
 #include <iostream>
 #include "Enemy.hpp"
 
-Player::Player(float x, float y, int hp) : Entity(x, y, sf::Color::Blue, hp), attackTimer(0.f) {}
+Player::Player(float x, float y, int hp) : Entity(x, y, Color::Blue, hp), attackTimer(0.f) {}
 
-void Player::update(const float& deltaTime, Grid& grid, std::vector<std::shared_ptr<Entity>> entities) {
+void Player::update(const float& deltaTime, Grid& grid, vector<shared_ptr<Entity>> entities) {
 
-    std::vector<std::shared_ptr<Enemy>> enemies =
+    vector<shared_ptr<Enemy>> enemies =
     {
-        std::dynamic_pointer_cast<Enemy>(entities[0]),
-        std::dynamic_pointer_cast<Enemy>(entities[1])
+        dynamic_pointer_cast<Enemy>(entities[0]),
+        dynamic_pointer_cast<Enemy>(entities[1])
     };
 
-    sf::Vector2f movement(0.f, 0.f);
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) movement.y -= SPEED * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movement.y += SPEED * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) movement.x -= SPEED * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movement.x += SPEED * deltaTime;
+    Vector2f movement(0.f, 0.f);
+    if (Keyboard::isKeyPressed(Keyboard::Z)) movement.y -= SPEED * deltaTime;
+    if (Keyboard::isKeyPressed(Keyboard::S)) movement.y += SPEED * deltaTime;
+    if (Keyboard::isKeyPressed(Keyboard::Q)) movement.x -= SPEED * deltaTime;
+    if (Keyboard::isKeyPressed(Keyboard::D)) movement.x += SPEED * deltaTime;
 
-    sf::Vector2f newPosition = shape.getPosition() + movement;
-    sf::FloatRect newBounds(newPosition, shape.getSize());
+    Vector2f newPosition = shape.getPosition() + movement;
+    FloatRect newBounds(newPosition, shape.getSize());
 
     // Vérifier les quatre coins du joueur
     auto isWalkable = [&](float x, float y) {
@@ -38,18 +38,18 @@ void Player::update(const float& deltaTime, Grid& grid, std::vector<std::shared_
     }
 
     attackTimer += deltaTime;
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && attackTimer >= ATTACK_COOLDOWN) {
+    if (Mouse::isButtonPressed(Mouse::Left) && attackTimer >= ATTACK_COOLDOWN) {
         attack(enemies);
         attackTimer = 0.f;
     }
 }
 
-void Player::attack(std::vector<std::shared_ptr<Enemy>> enemies) {
+void Player::attack(vector<shared_ptr<Enemy>> enemies) {
     for (auto& enemy : enemies) {
         if (enemy->isAlive() && shape.getGlobalBounds().intersects(enemy->shape.getGlobalBounds())) {
             enemy->takeDamage(DAMAGE);
-            std::cout << "Enemy HP: " << enemy->health << std::endl;
+            cout << "Enemy HP: " << enemy->health << endl;
         }
     }
-    std::cout << "Player attacks" << std::endl;
+    cout << "Player attacks" << endl;
 }
